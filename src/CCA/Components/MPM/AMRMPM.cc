@@ -3620,6 +3620,7 @@ void AMRMPM::computeLAndF(const ProcessorGroup*,
       ParticleVariable<Matrix3> pFNew,pVelGrad;
       ParticleVariable<Vector> pConcGradNew,pareanew;
       ParticleVariable<Vector> pPosChargeGrad, pNegChargeGrad;
+      constParticleVariable<int> pLocalized;
 
       // Get the arrays of grid data on which the new particle values depend
       constNCVariable<Vector> gvelocity_star;
@@ -3633,6 +3634,7 @@ void AMRMPM::computeLAndF(const ProcessorGroup*,
       new_dw->get(psize,        lb->pCurSizeLabel,                   pset);
       old_dw->get(pFOld,        lb->pDeformationMeasureLabel,        pset);
       old_dw->get(pmass,        lb->pMassLabel,                      pset);
+      old_dw->get(pLocalized,   lb->pLocalizedMPMLabel,              pset);
 
       new_dw->allocateAndPut(pvolume,     lb->pVolumeLabel_preReloc,      pset);
       new_dw->allocateAndPut(pVelGrad,    lb->pVelGradLabel_preReloc,     pset);
@@ -3781,6 +3783,10 @@ void AMRMPM::computeLAndF(const ProcessorGroup*,
         }
       } //end of pressureStabilization loop  at the patch level
 
+      // _________________________________
+      //   Apply Erosion
+      ErosionModel* em = mpm_matl->getErosionModel();
+      em->updateVariables_Erosion(pset, pLocalized, pFOld, pFNew, pVelGrad);
     }
     delete interpolator;
   }
