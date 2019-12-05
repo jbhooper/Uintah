@@ -716,6 +716,13 @@ void AMRMPM::scheduleTimeAdvance(const LevelP & level,
     scheduleComputeStressTensor(            sched, patches, matls);
   }
 
+  // Stress updated above, but deformation gradient not corrected for the reset stress due to erosion.  Fixme! TODO!  JBH
+  for (int l = 0; l < maxLevels; l++) {
+	  const LevelP& level = grid->getLevel(l);
+	  const PatchSet* patches = level->eachPatch();
+
+  }
+
   if(flags->d_computeScaleFactor){
     for (int l = 0; l < maxLevels; l++) {
       const LevelP& level = grid->getLevel(l);
