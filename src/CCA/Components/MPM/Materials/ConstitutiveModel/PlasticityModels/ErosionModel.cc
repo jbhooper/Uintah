@@ -55,15 +55,15 @@ ErosionModel::ErosionModel( ProblemSpecP   & matl_ps,
     
     if (algo == "AllowNoTension"){
       d_algo      = erosionAlgo::AllowNoTension;
-      d_doEorsion = true;
+      m_doErosion = true;
     }
     else if (algo == "ZeroStress"){
       d_algo      = erosionAlgo::ZeroStress;
-      d_doEorsion = true;
+      m_doErosion = true;
     }
     else if (algo == "AllowNoShear"){
       d_algo      = erosionAlgo::AllowNoShear;
-      d_doEorsion = true;
+      m_doErosion = true;
     }          
     em_ps->getWithDefault("char_time", d_charTime, 1.0e-99);        // Characteristic time for damage
 //    cout << " //__________________________________d_Algo: " << d_algo << " algoName " << algo << " d_charTime: " << d_charTime << "  " <<( d_algo == erosionAlgo::none ) << endl;
@@ -92,7 +92,7 @@ ErosionModel::~ErosionModel()
 void 
 ErosionModel::outputProblemSpec( ProblemSpecP& ps )
 {
-  if(! d_doEorsion) {
+  if(! m_doErosion) {
     return;
   }  
   printTask( dbg, "ErosionModel::outputProblemSpec (each Matl)" );
@@ -109,7 +109,7 @@ ErosionModel::carryForward(const PatchSubset* patches,
                            DataWarehouse    * old_dw,
                            DataWarehouse    * new_dw)
 {
-  if(! d_doEorsion) {
+  if(! m_doErosion) {
     return;
   }
   //
@@ -126,7 +126,7 @@ void
 ErosionModel::addParticleState(std::vector<const VarLabel*>& from,
                                std::vector<const VarLabel*>& to)
 {
-  if(! d_doEorsion) {
+  if(! m_doErosion) {
     return;
   }
   //
@@ -140,7 +140,7 @@ void
 ErosionModel::addInitialComputesAndRequires(Task* task,
                                             const MPMMaterial* matl )
 {
-  if(! d_doEorsion) {
+  if(! m_doErosion) {
     return;
   }
   //
@@ -159,7 +159,7 @@ ErosionModel::initializeLabels(const Patch       * patch,
                                const MPMMaterial * matl,
                                DataWarehouse     * new_dw)
 {
-  if(! d_doEorsion) {
+  if(! m_doErosion) {
     return;
   }
 
@@ -186,7 +186,7 @@ void
 ErosionModel::addComputesAndRequires(Task* task,
                                      const MPMMaterial* matl)
 {
-  if(! d_doEorsion) {
+  if(! m_doErosion) {
     return;
   }
   //
@@ -206,7 +206,7 @@ ErosionModel::updateStress_Erosion( ParticleSubset * pset,
                                     DataWarehouse  * old_dw,
                                     DataWarehouse  * new_dw)
 {
-  if(! d_doEorsion) {
+  if(! m_doErosion) {
     return;
   }
   //
