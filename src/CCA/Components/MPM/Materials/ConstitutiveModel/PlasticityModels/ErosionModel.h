@@ -53,6 +53,9 @@ namespace Uintah {
     void addComputesAndRequires(Task             * task,
                                 const MPMMaterial* matl);
 
+    void addComputesAndRequires_deformation(  	  Task			*	task	,
+    										const MPMMaterial	*	matl	);
+
     void carryForward( const PatchSubset * patches,
                        const MPMMaterial * matl,
                        DataWarehouse     * old_dw,

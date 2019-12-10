@@ -171,13 +171,36 @@ void MPMCommon::scheduleUpdateStress_DamageErosionModels(SchedulerP   & sched,
   
   sched->addTask(t, patches, matls);
 }
+
+void MPMCommon::scheduleAdjustFailedDeformations_DamageErosionModels(		SchedulerP	&	sched	,
+															         const	PatchSet	*	patches	,
+																     const	MaterialSet	*	matls	)
+{
+	printSchedule(patches,cout_doing,"MPMCommon::scheduleAdjustFailedParticles_DamageErosionModels");
+
+	Task* t = scinew Task("MPMCommon::adjustFailedParticles_DamageErosionModels", this,
+			              &MPMCommon::adjustFailedDeformations_DamageErosionModels);
+
+	t->requires(Task::OldDW, lb->simulationTimeLabel);
+
+	int numMatls = m_materialManager->getNumMatls("MPM");
+	for (int matIndex = 0; matIndex < numMatls; ++matIndex) {
+		MPMMaterial*	mpm_matl = reinterpret_cast<MPMMaterial*>
+										(m_materialManager->getMaterial("MPM",matIndex));
+		ErosionModel* 	em = mpm_matl->getErosionModel();
+		// Variables we need but won't change.
+		em->addComputesAndRequires_deformation(t, mpm_matl);
+	}
+
+	sched->addTask(t, patches, matls);
+}
 //______________________________________________________________________
 //
-void MPMCommon::updateStress_DamageErosionModels(const ProcessorGroup *,
-                                                 const PatchSubset    * patches,
-                                                 const MaterialSubset * ,
-                                                 DataWarehouse        * old_dw,
-                                                 DataWarehouse        * new_dw)
+void MPMCommon::updateStress_DamageErosionModels(const ProcessorGroup *			,
+                                                 const PatchSubset    * patches	,
+                                                 const MaterialSubset * 		,
+                                                 DataWarehouse        * old_dw	,
+                                                 DataWarehouse        * new_dw	)
 {
   for (int p = 0; p<patches->size(); p++) {
     const Patch* patch = patches->get(p);
@@ -199,4 +222,44 @@ void MPMCommon::updateStress_DamageErosionModels(const ProcessorGroup *,
       em->updateStress_Erosion( pset, old_dw, new_dw );
     }
   }
+}
+
+void MPMCommon::adjustFailedDeformations_DamageErosionModels(const ProcessorGroup	*			,
+														  	 const PatchSubset		*	patches	,
+															 const MaterialSubset	*			,
+														 	 	   DataWarehouse	*	old_dw	,
+																   DataWarehouse	*	new_dw	)
+{
+	for (int patchIdx = 0; patchIdx < patches->size(); ++patchIdx) {
+		const Patch* patch = patches->get(patchIdx);
+
+		printTask(patches, patch, cout_doing, "MPMCommon::adjustFailedParticles_DamageErosionModel");
+
+		size_t numMPMMatls = m_materialManager->getNumMatls("MPM");
+		for (size_t matIndex = 0; matIndex < numMPMMatls; ++matIndex) {
+			MPMMaterial* mpm_matl = reinterpret_cast<MPMMaterial*> (m_materialManager->getMaterial("MPM", matIndex));
+			ErosionModel* em = mpm_matl->getErosionModel();
+
+			if (em->m_doErosion) {
+				int dwi = mpm_matl->getDWIndex();
+				ParticleSubset* pset = old_dw->getParticleSubset(dwi, patch);
+
+				constParticleVariable<Matrix3> pF_Old;
+				constParticleVariable<int>     pLocalized;
+				ParticleVariable<Matrix3>      pF_New;
+				ParticleVariable<Matrix3>      pVelGrad;
+
+				// Variables we need but won't change.
+				old_dw->get(pF_Old, 	lb->pDeformationMeasureLabel, 		pset);
+				new_dw->get(pLocalized, lb->pLocalizedMPMLabel_preReloc, 	pset);
+
+				// Variables that will get changed if appropriate.
+				new_dw->getModifiable(pF_New,	lb->pDeformationMeasureLabel_preReloc,	pset);
+				new_dw->getModifiable(pVelGrad,	lb->pVelGradLabel_preReloc,				pset);
+
+				em->updateVariables_Erosion(pset, pLocalized, pF_Old, pF_New, pVelGrad);
+
+			}
+		}
+	}
 }

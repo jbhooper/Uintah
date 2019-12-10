@@ -87,6 +87,7 @@ ThresholdDamage::ThresholdDamage( ProblemSpecP    & ps,
       ps->require("exponent", d_epsf.exponent);
     }
   }
+  ps->getWithDefault("output_failures", d_outputFailures, false);
   ps->get("failure_seed",    d_epsf.seed);        // Seed for RN generator
 
 
@@ -351,7 +352,7 @@ ThresholdDamage::computeSomething( ParticleSubset    * pset,
         if ( maxEigen > pFailureStrain[idx] ){
           pLocalized_new[idx] = 1;
         }
-        if ( pLocalized[idx] != pLocalized_new[idx]) {
+        if (( pLocalized[idx] != pLocalized_new[idx]) && d_outputFailures) {
           cout << "Particle " << pParticleID[idx] << " has failed : MaxPrinStress = "
                << maxEigen << " eps_f = " << pFailureStrain[idx] << endl;
         }
@@ -395,7 +396,7 @@ ThresholdDamage::computeSomething( ParticleSubset    * pset,
           pLocalized_new[idx] = 2;
           epsMax = (maxEigen - minEigen)/2.0;
         }
-        if (pLocalized[idx] != pLocalized_new[idx]) {
+        if ((pLocalized[idx] != pLocalized_new[idx]) && d_outputFailures) {
           cout << "Particle " << pParticleID[idx] << " has failed : maxPrinStress = "
                << epsMax << " cohesion = " << cohesion << endl;
         }

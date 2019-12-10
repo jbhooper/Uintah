@@ -720,7 +720,7 @@ void AMRMPM::scheduleTimeAdvance(const LevelP & level,
   for (int l = 0; l < maxLevels; l++) {
 	  const LevelP& level = grid->getLevel(l);
 	  const PatchSet* patches = level->eachPatch();
-      scheduleAdjustFailedParticles(  sched, patches, matls);
+	  scheduleAdjustFailedDeformations_DamageErosionModels(sched, patches, matls);
   }
 
   if(flags->d_computeScaleFactor){
@@ -1428,32 +1428,6 @@ void AMRMPM::scheduleComputeParticleScaleFactor(SchedulerP& sched,
   sched->addTask(t, patches, matls);
 }
 
-void AMRMPM::scheduleAdjustFailedParticles(     	SchedulerP	&	sched	,
-										   const	PatchSet	*	patches	,
-										   const	MaterialSet	*	matls)
-{
-	if (!flags->doMPMOnLevel(getLevel(patches)->getIndex(),
-							 getLevel(patches)->getGrid()->numLevels())) {
-		return;
-	}
-
-	printSchedule(patches, cout_doing, "AMRMPM::scheduleAdjustFailedParticles");
-
-	Task* t = scinew Task("AMRMPM::adjustFailedParticles", this,
-						  &AMRMPM::adjustFailedParticles);
-
-	t->requires(Task::NewDW, lb->pDeformationMeasureLabel_preReloc, Ghost::None);
-	t->requires(Task::NewDW, lb->pStressLabel_preReloc, Ghost::None);
-	t->modifies(lb->pDeformationMeasureLabel_preReloc);
-
-	sched->addTask(t, patches, matls);
-}
-
-void AMRMPM::adjustFailedParticles(
-								  )
-{
-
-}
 //______________________________________________________________________
 //
 void AMRMPM::scheduleFinalParticleUpdate(SchedulerP& sched,
@@ -3819,8 +3793,8 @@ void AMRMPM::computeLAndF(const ProcessorGroup*,
 
       // _________________________________
       //   Apply Erosion
-      ErosionModel* em = mpm_matl->getErosionModel();
-      em->updateVariables_Erosion(pset, pLocalized, pFOld, pFNew, pVelGrad);
+//      ErosionModel* em = mpm_matl->getErosionModel();
+//      em->updateVariables_Erosion(pset, pLocalized, pFOld, pFNew, pVelGrad);
     }
     delete interpolator;
   }

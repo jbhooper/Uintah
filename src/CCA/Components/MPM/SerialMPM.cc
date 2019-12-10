@@ -741,6 +741,7 @@ SerialMPM::scheduleTimeAdvance(const LevelP & level,
   scheduleInterpolateToParticlesAndUpdate(sched, patches, matls);
   scheduleComputeParticleGradients(       sched, patches, matls);
   scheduleComputeStressTensor(            sched, patches, matls);
+  scheduleAdjustFailedDeformations_DamageErosionModels(sched, patches, matls);
   scheduleFinalParticleUpdate(            sched, patches, matls);
   scheduleInsertParticles(                    sched, patches, matls);
   if(flags->d_computeScaleFactor){

@@ -199,6 +199,29 @@ ErosionModel::addComputesAndRequires(Task* task,
   task->computes(pTimeOfLocLabel_preReloc,     matls);
 }
 
+void
+ErosionModel::addComputesAndRequires_deformation(		Task		* 	task	,
+												 const 	MPMMaterial	*	matl	)
+{
+	if(! m_doErosion) {
+		return;
+	}
+
+	printTask( dbg, "  ErosionModel::addCOmputesAndRequires_deformation");
+
+	Ghost::GhostType gnone = Ghost::None;
+	const MaterialSubset* matls = matl->thisMaterial();
+
+	task->requires(Task::OldDW, d_lb->pDeformationMeasureLabel,  	matls, gnone);
+	task->requires(Task::NewDW, d_lb->pLocalizedMPMLabel_preReloc, 	matls, gnone);
+
+	// Used as a gateway flag to ensure that this happens after we've updated the stress due to
+	//   the erosion model.  Not actually required.
+	task->requires(Task::NewDW, pTimeOfLocLabel_preReloc,    		matls, gnone);
+
+	task->modifies(d_lb->pVelGradLabel_preReloc, matls);
+	task->modifies(d_lb->pDeformationMeasureLabel_preReloc, matls);
+}
 //______________________________________________________________________
 //
 void

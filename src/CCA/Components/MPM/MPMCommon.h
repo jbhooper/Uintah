@@ -59,6 +59,10 @@ namespace Uintah {
                                                   const PatchSet    * patches,
                                                   const MaterialSet * matls );
 
+    void scheduleAdjustFailedDeformations_DamageErosionModels(		SchedulerP	&	sched	,
+    													      const	PatchSet	*	patches	,
+														      const	MaterialSet	*	matls	);
+
     // Used by the switcher
     virtual void setupForSwitching() {
   
@@ -103,6 +107,12 @@ namespace Uintah {
                                           const MaterialSubset  * ,
                                           DataWarehouse         * old_dw,
                                           DataWarehouse         * new_dw );
+
+    void adjustFailedDeformations_DamageErosionModels(const ProcessorGroup	*			,
+    											      const PatchSubset		*	patches	,
+												      const MaterialSubset	*			,
+												   	   	    DataWarehouse	*	old_dw	,
+														    DataWarehouse	*	new_dw	);
   };
 }
 

@@ -97,6 +97,7 @@ namespace Uintah {
 
     protected:
     MPMLabel* d_lb;
+    bool      d_outputFailures;
   };
 } // End namespace Uintah
 

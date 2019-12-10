@@ -566,6 +566,7 @@ private:
                                              const PatchSet* patches,
                                              const MaterialSet* matls);
 
+
   /*
    * Scalar Flux Boundary Conditions have been moved to the FluxBCModel
    *
