@@ -2,7 +2,7 @@
 
 from os import symlink,environ, system
 from sys import argv,exit,platform
-from helpers.runSusTests import runSusTests, ignorePerformanceTests, getInputsDir
+from helpers.runSusTests_git import runSusTests, ignorePerformanceTests, getInputsDir
 from helpers.modUPS import modUPS
 
 the_dir = "%s/%s" % ( getInputsDir(),"ARCHES" )
@@ -170,23 +170,23 @@ KOKKOS_TESTS = [
 ]
 
 RMCRT_TESTS = [
-   ("rmcrt_bm1_1L"                      , "RMCRT/rmcrt_bm1_1L.ups"                , 1   , "ALL"  , ["exactComparison"]) ,
-   ("rmcrt_bm1_1L_bounded"              , "RMCRT/rmcrt_bm1_1L_bounded.ups"        , 8   , "ALL"  , ["exactComparison"]) ,
-   ("rmcrt_bm1_ML"                      , "RMCRT/rmcrt_bm1_ML.ups"                , 1   , "ALL"  , ["exactComparison"]) ,
-   ("rmcrt_bm1_DO"                      , "RMCRT/rmcrt_bm1_DO.ups"                , 1   , "ALL"  , ["exactComparison"]) ,
-   ("methane_rmcrt"                     , "RMCRT/methane_rmcrt.ups"               , 8   , "ALL"  , ["exactComparison"   , "no_restart"]) ,
-   ("methane_VR"                        , "RMCRT/methane_VR.ups"                  , 8   , "ALL"  , ["exactComparison"]) ,
-   ("multibox_rmcrt_coal_1L"            , "RMCRT/multibox_rmcrt_coal_1L.ups"      , 8   , "ALL"  , ["exactComparison"]) ,
-   ("multibox_rmcrt_coal_2L"            , "RMCRT/multibox_rmcrt_coal_2L.ups"      , 8   , "ALL"  , ["exactComparison"]) ,
-   ("multibox_rmcrt_coal_DO"            , "RMCRT/multibox_rmcrt_coal_DO.ups"      , 8   , "ALL"  , ["exactComparison"]) ,
+   ("rmcrt_bm1_1L"                      , "RMCRT/rmcrt_bm1_1L.ups"                , 1   , "ALL"  , [ "exactComparison" ]) ,
+   ("rmcrt_bm1_1L_bounded"              , "RMCRT/rmcrt_bm1_1L_bounded.ups"        , 8   , "ALL"  , [ "exactComparison" ]) ,
+   ("rmcrt_bm1_ML"                      , "RMCRT/rmcrt_bm1_ML.ups"                , 1   , "ALL"  , [ "exactComparison" ]) ,
+   ("rmcrt_bm1_DO"                      , "RMCRT/rmcrt_bm1_DO.ups"                , 1   , "ALL"  , [ "exactComparison" ]) ,
+   ("methane_rmcrt"                     , "RMCRT/methane_rmcrt.ups"               , 8   , "ALL"  , [ "exactComparison", "no_restart"]) ,
+   ("methane_VR"                        , "RMCRT/methane_VR.ups"                  , 8   , "ALL"  , [ "exactComparison" ]) ,
+   ("multibox_rmcrt_coal_1L"            , "RMCRT/multibox_rmcrt_coal_1L.ups"      , 8   , "ALL"  , [ "exactComparison" ]) ,
+   ("multibox_rmcrt_coal_2L"            , "RMCRT/multibox_rmcrt_coal_2L.ups"      , 8   , "ALL"  , [ "exactComparison" ]) ,
+   ("multibox_rmcrt_coal_DO"            , "RMCRT/multibox_rmcrt_coal_DO.ups"      , 8   , "ALL"  , [ "exactComparison" ]) ,
 
 # multi-threaded RMCRT tests
-   ("rmcrt_bm1_1L_thread"               , "RMCRT/rmcrt_bm1_1L.ups"                , 1   , "ALL"  , ["no_restart", "exactComparison", "sus_options=-nthreads 4"]) ,
-   ("rmcrt_bm1_ML_thread"               , "RMCRT/rmcrt_bm1_ML.ups"                , 1   , "ALL"  , ["no_restart", "exactComparison", "sus_options=-nthreads 4"]) ,
-   ("rmcrt_bm1_DO_thread"               , "RMCRT/rmcrt_bm1_DO.ups"                , 1   , "ALL"  , ["no_restart", "exactComparison", "sus_options=-nthreads 8"]) ,
-   ("multibox_rmcrt_coal_1L_threaded"   , "RMCRT/multibox_rmcrt_coal_1L.ups"      , 2   , "ALL"  , ["exactComparison", "sus_options=-nthreads 8"]) ,
-   ("multibox_rmcrt_coal_2L_threaded"   , "RMCRT/multibox_rmcrt_coal_2L.ups"      , 2   , "ALL"  , ["exactComparison", "sus_options=-nthreads 8"]) ,
-   ("multibox_rmcrt_coal_DO_threaded"   , "RMCRT/multibox_rmcrt_coal_DO.ups"      , 2   , "ALL"  , ["exactComparison", "sus_options=-nthreads 8"]) ,
+   ("rmcrt_bm1_1L_thread"               , "RMCRT/rmcrt_bm1_1L.ups"                , 1   , "ALL"  , ["no_restart",  "exactComparison", "sus_options=-nthreads 4" ]) ,
+   ("rmcrt_bm1_ML_thread"               , "RMCRT/rmcrt_bm1_ML.ups"                , 1   , "ALL"  , ["no_restart",  "exactComparison", "sus_options=-nthreads 4" ]) ,
+   ("rmcrt_bm1_DO_thread"               , "RMCRT/rmcrt_bm1_DO.ups"                , 1   , "ALL"  , ["no_restart",  "exactComparison", "sus_options=-nthreads 8" ]) ,
+   ("multibox_rmcrt_coal_1L_threaded"   , "RMCRT/multibox_rmcrt_coal_1L.ups"      , 2   , "ALL"  , [ "exactComparison", "sus_options=-nthreads 8"]) ,
+   ("multibox_rmcrt_coal_2L_threaded"   , "RMCRT/multibox_rmcrt_coal_2L.ups"      , 2   , "ALL"  , [ "exactComparison", "sus_options=-nthreads 8"]) ,
+   ("multibox_rmcrt_coal_DO_threaded"   , "RMCRT/multibox_rmcrt_coal_DO.ups"      , 2   , "ALL"  , [ "exactComparison", "sus_options=-nthreads 8"])
 ]
 
 SWEEPS_TESTS = [
