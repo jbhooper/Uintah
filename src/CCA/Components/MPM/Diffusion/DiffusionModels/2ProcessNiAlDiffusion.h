@@ -137,11 +137,13 @@ namespace Uintah
             bool                    m_lowTOldModel;
             double                  m_lowT_Al;
             double                  m_lowT_Ni;
+            double                  m_criticalMeltFraction;
       const VarLabel              * m_globalMinNiConc;
       const VarLabel              * m_globalMinAlConc;
       const VarLabel              * m_pRegionType;
       const VarLabel              * m_pRegionType_preReloc;
       const VarLabel              * m_pDiffusionCoefficient;
+      const VarLabel              * m_copypMeltLabel;
 
   };
 }

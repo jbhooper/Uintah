@@ -1507,6 +1507,7 @@ CleanReactionDiffusionEP::computeStressTensor(const PatchSubset   * patches  ,
 
       pdTdt[idx] = pdTdt_Adjusted;
       pHeatBuffer_new[idx] = qBufferNew;
+      pMeltProgress_new[idx] = qBufferNew / (pMass[idx] * d_dHFusion);
       if (pColor_new[idx] != d_reactedColor && pMeltProgress_new[idx] > 0) pColor_new[idx] = d_meltingColor;
 
       // JBH - All sources of temperature have been included now, back it out

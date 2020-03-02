@@ -35,6 +35,8 @@ namespace Uintah {
     probSpec->getWithDefault("Low_Temp_Al",m_lowT_Al, 933);
     probSpec->getWithDefault("Low_Temp_Ni",m_lowT_Ni, 1728);
     probSpec->getWithDefault("Use_old_model_low_temp",m_lowTOldModel, false);
+    probSpec->getWithDefault("Melt_fraction_for_liquid_diffusivity",m_criticalMeltFraction, 0.9999);
+    if (m_criticalMeltFraction > 0.9999) m_criticalMeltFraction = 0.9999;
 
     ProblemSpecP interpPS = probSpec->findBlock("function_interp");
     if (!interpPS) {
@@ -50,6 +52,8 @@ namespace Uintah {
     m_pRegionType = VarLabel::create("p.regionTypeEnumIndex",ParticleVariable<int>::getTypeDescription());
     m_pRegionType_preReloc = VarLabel::create("p.regionTypeEnumIndex+", ParticleVariable<int>::getTypeDescription());
     m_pDiffusionCoefficient = VarLabel::create("p.diffusionCoefficient", ParticleVariable<double>::getTypeDescription());
+
+    m_copypMeltLabel = VarLabel::find("p.meltProgress");
   }
 
   NiAl2Process::~NiAl2Process()
@@ -101,6 +105,7 @@ namespace Uintah {
     task->requires(Task::OldDW, m_pRegionType,            matlSubset, gnone);
     task->requires(Task::OldDW, m_globalMinAlConc);
     task->requires(Task::OldDW, m_globalMinNiConc);
+    task->requires(Task::OldDW, m_copypMeltLabel, matlSubset, gnone);
 
     task->computes(d_lb->pFluxLabel_preReloc, matlSubset);
     task->computes(m_pDiffusionCoefficient, matlSubset);
@@ -121,12 +126,14 @@ namespace Uintah {
     constParticleVariable<double> pConcentration;
     constParticleVariable<Vector> pGradConcentration;
     constParticleVariable<int>    pRegionType;
+    constParticleVariable<double> pMeltProgress;
 
     ParticleSubset* pSubset = old_dw->getParticleSubset(dwIdx, patch);
 
     old_dw->get(pGradConcentration, d_lb->pConcGradientLabel,   pSubset);
     old_dw->get(pTemperature,       d_lb->pTemperatureLabel,    pSubset);
     old_dw->get(pConcentration,     d_lb->pConcentrationLabel,  pSubset);
+    old_dw->get(pMeltProgress,      m_copypMeltLabel,   		pSubset);
     old_dw->get(pRegionType,        m_pRegionType,              pSubset);
 
     ParticleVariable<double> pDiffusionCoefficient;
@@ -158,9 +165,11 @@ namespace Uintah {
       const Vector & gradConc = pGradConcentration[pIdx];
       // For now, just ignore the minimum concentration crap.  JBH Fixme
       minConc = 0.0;
+      double liquidMix = 0.0;
+      if (pMeltProgress[pIdx] >= m_criticalMeltFraction) liquidMix = 1.0;
       double D = EAM_AlNi::Diffusivity(Temp,Conc,gradConc,minConc,regionType,
                                        m_phaseInterpolator,m_D0Liquid,m_D0Solid,m_D0LowT,
-                                       m_lowTOldModel, m_lowT_Al, m_lowT_Ni)*m_multiplier;
+                                       m_lowTOldModel, m_lowT_Al, m_lowT_Ni, liquidMix)*m_multiplier;
       pDiffusionCoefficient[pIdx] = D;
       pFluxNew[pIdx] = D * pGradConcentration[pIdx];
       diffMax = std::max(diffMax, D);
@@ -257,6 +266,7 @@ namespace Uintah {
       sdmPS->appendElement("Low_Temp_Al",m_lowT_Al);
       sdmPS->appendElement("Low_Temp_Ni",m_lowT_Ni);
       sdmPS->appendElement("Use_old_model_low_temp",m_lowTOldModel);
+      sdmPS->appendElement("Melt_fraction_for_liquid_diffusivity",m_criticalMeltFraction);
 
 
       m_phaseInterpolator->outputProblemSpec(sdmPS, output_rdm_tag);
