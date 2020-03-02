@@ -81,8 +81,8 @@
 	<!-- Reactive/Diffusive CM -->
 	<heat_of_fusion                spec="REQUIRED DOUBLE 'positive'" need_applies_to="type reactive_diffusive_EP" />
     <heat_of_reaction              spec="REQUIRED DOUBLE " need_applies_to="type reactive_diffusive_EP" />
-    <heating_rate                  spec="OPTIONAL DOUBLE " need_applies_to="type reactive_diffusive_EP" />
-    <heating_cutoff                spec="OPTIONAL DOUBLE 'positive' " need_applies_to="type reactive_diffusive_EP" />
+     <heating_rate                  spec="OPTIONAL DOUBLE " need_applies_to="type reactive_diffusive_EP" />
+     <heating_cutoff                spec="OPTIONAL DOUBLE 'positive' " need_applies_to="type reactive_diffusive_EP" />
 	
     
     <!--__________________________________-->
