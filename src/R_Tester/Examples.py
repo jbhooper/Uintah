@@ -2,7 +2,7 @@
 
 from sys import argv,exit
 from os import environ, system
-from helpers.runSusTests import runSusTests, ignorePerformanceTests, getInputsDir
+from helpers.runSusTests_git import runSusTests, ignorePerformanceTests, getInputsDir
 from helpers.modUPS import modUPS,modUPS2
 
 from os import system
@@ -42,22 +42,23 @@ RMCRT_DO_perf_GPU_ups = modUPS2( the_dir, \
 #  OS:  Linux, Darwin, or ALL
 #
 #  flags:
-#       gpu:                    - run test if machine is gpu enabled
-#       no_uda_comparison:      - skip the uda comparisons
-#       no_memoryTest:          - skip all memory checks
-#       no_restart:             - skip the restart tests
-#       no_dbg:                 - skip all debug compilation tests
-#       no_opt:                 - skip all optimized compilation tests
-#       no_cuda:                - skip test if this is a cuda enable build
-#       do_performance_test:    - Run the performance test, log and plot simulation runtime.
-#                                 (You cannot perform uda comparsions with this flag set)
-#       doesTestRun:            - Checks if a test successfully runs
-#       abs_tolerance=[double]  - absolute tolerance used in comparisons
-#       rel_tolerance=[double]  - relative tolerance used in comparisons
-#       exactComparison         - set absolute/relative tolerance = 0  for uda comparisons
-#       postProcessRun          - start test from an existing uda in the checkpoints directory.  Compute new quantities and save them in a new uda
-#       startFromCheckpoint     - start test from checkpoint. (/home/rt/CheckPoints/..../testname.uda.000)
-#       sus_options="string"    - Additional command line options for sus command
+#       gpu:                        - run test if machine is gpu enabled
+#       no_uda_comparison:          - skip the uda comparisons
+#       no_memoryTest:              - skip all memory checks
+#       no_restart:                 - skip the restart tests
+#       no_dbg:                     - skip all debug compilation tests
+#       no_opt:                     - skip all optimized compilation tests
+#       no_cuda:                    - skip test if this is a cuda enable build
+#       do_performance_test:        - Run the performance test, log and plot simulation runtime.
+#                                     (You cannot perform uda comparsions with this flag set)
+#       doesTestRun:                - Checks if a test successfully runs
+#       abs_tolerance=[double]      - absolute tolerance used in comparisons
+#       rel_tolerance=[double]      - relative tolerance used in comparisons
+#       exactComparison             - set absolute/relative tolerance = 0  for uda comparisons
+#       postProcessRun              - start test from an existing uda in the checkpoints directory.  Compute new quantities and save them in a new uda
+#       startFromCheckpoint         - start test from checkpoint. (/home/rt/CheckPoints/..../testname.uda.000)
+#       sus_options="string"        - Additional command line options for sus command
+#       compareUda_options="string" - Additional command line options for compare_uda
 #
 #  Notes:
 #  1) The "folder name" must be the same as uda without the extension.
@@ -75,7 +76,9 @@ BASETESTS   =  [   ("RMCRT_test_1L",    "RMCRT_bm1_1L.ups",            1, "ALL",
                    ("RMCRT_isoScat",    "RMCRT_isoScat.ups",           1, "ALL", ["exactComparison"]),
                    ("RMCRT_isoScat_LHC", RMCRT_isoScat_LHC_ups,        1, "ALL", ["exactComparison"]),
                    ("RMCRT_1L_reflect", "RMCRT_1L_reflect.ups",        1, "ALL", ["exactComparison"]),
-                   ("RMCRT_udaInit",    "RMCRT_udaInit.ups",           1, "ALL", ["exactComparison","no_restart"])
+                   ("RMCRT_udaInit",    "RMCRT_udaInit.ups",           1, "ALL", ["exactComparison","no_restart"]),
+                   ("RMCRT_1L_perf",    "RMCRT_1L_perf.ups",           1, "ALL", ["do_performance_test"]),
+                   ("RMCRT_DO_perf",    "RMCRT_DO_perf.ups",           1, "ALL", ["do_performance_test"])
                 ]
 
 FLOATTESTS    = [  ("RMCRT_FLT_test_1L", "RMCRT_FLT_bm1_1L.ups",     1,   "ALL", ["exactComparison"]),
@@ -110,19 +113,19 @@ DOMAINTESTS   =[   ("RMCRT_+Domain",         "RMCRT_+Domain.ups",        8, "ALL
                    ("RMCRT_+Domain_DO",      "RMCRT_+Domain_DO.ups",     8, "ALL", ["exactComparison"])
               ]
 
-KOKKOSTESTS   = [  
+KOKKOSTESTS   = [
 #                   ("RMCRT_test_1L",    "RMCRT_bm1_1L.ups",            1, "ALL", ["exactComparison"]),
 #                   ("RMCRT_1L_bounded",  "RMCRT_bm1_1L_bounded.ups",   8, "ALL", ["exactComparison"]),
 #                   ("RMCRT_bm1_DO",     "RMCRT_bm1_DO.ups",            1, "ALL", ["exactComparison"]),
 #                   ("RMCRT_isoScat",    "RMCRT_isoScat.ups",           1, "ALL", ["exactComparison"]),
 #                   ("RMCRT_ML",         "RMCRT_ML.ups",                8, "ALL", ["exactComparison"])
                 ]
-                
-                
-              
-POISSON3TESTS = [ #("poisson3_2L",         "poisson3_2L.ups",             2, "All", ["exactComparison"] ),       
-                  #("poisson3_3L",         "poisson3_3L.ups",             2, "All", ["exactComparison"] ),       
-                  ("poisson3_+Domain_1L",  "poisson3_+Domain_1L.ups",     2, "All", ["exactComparison"] )        
+
+
+
+POISSON3TESTS = [ #("poisson3_2L",         "poisson3_2L.ups",             2, "All", ["exactComparison"] ),
+                  #("poisson3_3L",         "poisson3_3L.ups",             2, "All", ["exactComparison"] ),
+                  ("poisson3_+Domain_1L",  "poisson3_+Domain_1L.ups",     2, "All", ["exactComparison"] )
                 ]
 DEBUGTESTS   =[]
 
