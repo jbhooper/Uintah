@@ -57,6 +57,7 @@ LRContact_CoulombAdhesive::LRContact_CoulombAdhesive(const ProcessorGroup* mywor
   d_oneOrTwoStep = 2;
 
   ps->require("mu",d_mu);
+  ps->require("adhesive_strength",d_adhesiveYield)
   ps->get("volume_constraint",d_vol_const);
   ps->get("OneOrTwoStep",     d_oneOrTwoStep);
 
@@ -81,6 +82,7 @@ void LRContact_CoulombAdhesive::outputProblemSpec(ProblemSpecP& ps)
   ProblemSpecP contact_ps = ps->appendChild("contact");
   contact_ps->appendElement("type", "friction_LR");
   contact_ps->appendElement("mu",                d_mu);
+  contact_ps->appendElement("adhesive_strength", d_adhesiveYield);
   contact_ps->appendElement("volume_constraint", d_vol_const);
   contact_ps->appendElement("OneOrTwoStep",      d_oneOrTwoStep);
   d_matls.outputProblemSpec(contact_ps);
@@ -132,8 +134,8 @@ void LRContact_CoulombAdhesive::exMomInterpolated(const ProcessorGroup*,
 
     for(NodeIterator iter = patch->getNodeIterator(); !iter.done();iter++){
       IntVector c = *iter;
-      Vector centerOfMassVelocity(0.,0.,0.);
-      double centerOfMassMass=0.0; 
+      Vector momentum_CoM(0.,0.,0.);
+      double mass_CoM=0.0;
       double totalNodalVol=0.0; 
       int alpha=alphaMaterial[c];
       // Need to think whether centerOfMass(Stuff) should
@@ -142,13 +144,13 @@ void LRContact_CoulombAdhesive::exMomInterpolated(const ProcessorGroup*,
       // but aren't near enough to be in proper contact.
       for(int n = 0; n < numMatls; n++){
         if(!d_matls.requested(n)) continue;
-        centerOfMassVelocity+=gvelocity[n][c] * gmass[n][c];
-        centerOfMassMass+= gmass[n][c]; 
-        totalNodalVol+=gvolume[n][c]*8.0*NC_CCweight[c];
+        momentum_CoM	+=	gvelocity[n][c] * gmass[n][c];
+        mass_CoM 		+= 	gmass[n][c];
+        totalNodalVol	+=	gvolume[n][c]*8.0*NC_CCweight[c];
       }
 
       if(alpha>=0){  // Only work on nodes where alpha!=-99
-        centerOfMassVelocity/=centerOfMassMass;
+        Vector velocity_CoM = momentum_CoM/mass_CoM;
 
         if(flag->d_axisymmetric){
           // Nodal volume isn't constant for axisymmetry
@@ -165,6 +167,30 @@ void LRContact_CoulombAdhesive::exMomInterpolated(const ProcessorGroup*,
           // the centerOfMassVelocity is nonzero (More than one velocity
           // field is contributing to grid vertex).
           for(int n = 0; n < numMatls; n++){
+            if (d_matls.requested(n) &&  (n!=alpha)) {
+            	double mass = gmass[n][c];
+            	if (mass > 1.e-16) { // This material has presence on this node.
+            		// Find separation of this material to the alpha material
+            		double separation = gmatlprominence[n][c] - gmatlprominence[alpha][c];
+            		// If separation is less than threshold, materials are overlapped
+            		if (separation <= 0.01*dx.x()) { // This assumes dx.x == dx.y == dx.z
+            			Vector velocityDifference = gvelocity[n][c] - velocity_CoM;
+            			Vector normal_direction = -1.0*normAlphaToBeta[c];
+            			double diffDotN = Dot(velocityDifference,normal_direction);
+
+            			Vector deltaV_friction(0.0, 0.0, 0.0);
+            			if (diffDotN > 0.0) { // Surface is moving toward other surface; probably not right for adhesion.
+            				Vector diffProjN = normal_direction * diffDotN;
+            				Vector diffProjT = velocityDifference - diffProjN; // Remainder is tangential component of velocity
+            				Vector tangent_direction = diffProjT/(diffProjT.length()+1.e-100); // Instead diffProjT.normal()
+            				double diffDotT = Dot(velocityDifference,tangent_direction);
+
+            				double frictionCoefficient = Min(d_mu, diffDotT/fabs(diffDotN));
+            			}
+            		}
+
+            	}
+            }
            if(!d_matls.requested(n)) continue;
            if(n==alpha) continue;
             double mass=gmass[n][c];
