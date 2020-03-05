@@ -184,8 +184,20 @@ void LRContact_CoulombAdhesive::exMomInterpolated(const ProcessorGroup*,
             				Vector diffProjT = velocityDifference - diffProjN; // Remainder is tangential component of velocity
             				Vector tangent_direction = diffProjT/(diffProjT.length()+1.e-100); // Instead diffProjT.normal()
             				double diffDotT = Dot(velocityDifference,tangent_direction);
-
+            				// Friction coefficient is the lesser of the friction coefficient or a virtual
+            				//   friction coefficient needed to fully express the tangent velocity change needed.
             				double frictionCoefficient = Min(d_mu, diffDotT/fabs(diffDotN));
+
+            				// Re-implement velocity difference but subject to friction.  Not right for adhesion yet.
+            				deltaV_friction = -diffProjN + tangent_direction*frictionCoefficient*fabs(diffDotN);
+
+            				// Reduce friction if not in direct contact; linear reduction.
+            				double reductionFactor = max(1.0,(0.01*dx.x() - separation)/0.01*dx.x());
+            				deltaV_friction *= reductionFactor;
+
+            				Vector deltaV_alphaMaterial = -deltaV_friction * gmass[n][c]/gmass[alpha][c];
+            				gvelocity[n][c] 	+= deltaV_friction;
+            				gvelocity[alpha][c] += deltaV_alphaMaterial;
             			}
             		}
 
