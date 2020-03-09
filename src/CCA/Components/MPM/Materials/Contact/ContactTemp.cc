@@ -113,7 +113,7 @@ void LRContact_CoulombAdhesive::exMomInterpolated(const ProcessorGroup*,
       		   Vector matlTangent = t_dpDott/(dpDott + 1.0e-100);
 
       		   // Determine if interface is under compression and/or in contact
-      		   bool compression = (dpDotn >= 0.0);
+      		   bool compression = (dpDotn > 0.0);
       		   bool stuck = false;
       		   Vector dp_corrected(0.0, 0.0, 0.0);
 	      	   // Find the contact area for this material.
