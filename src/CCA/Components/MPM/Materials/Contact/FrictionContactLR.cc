@@ -94,102 +94,99 @@ void FrictionContactLR::exMomInterpolated(const ProcessorGroup*,
 {
   if(d_oneOrTwoStep==2){
 
-   int numMatls = d_materialManager->getNumMatls( "MPM" );
-   ASSERTEQ(numMatls, matls->size());
+    int numMatls = d_materialManager->getNumMatls( "MPM" );
+    ASSERTEQ(numMatls, matls->size());
 
-   // Need access to all velocity fields at once
-   std::vector<constNCVariable<double> >  gmass(numMatls);
-   std::vector<constNCVariable<double> >  gvolume(numMatls);
-   std::vector<constNCVariable<double> >  gmatlprominence(numMatls);
-   std::vector<NCVariable<Vector> >       gvelocity(numMatls);
+    // Need access to all velocity fields at once
+    std::vector<constNCVariable<double> >  gmass(numMatls);
+    std::vector<constNCVariable<double> >  gvolume(numMatls);
+    std::vector<constNCVariable<double> >  gmatlprominence(numMatls);
+    std::vector<NCVariable<Vector> >       gvelocity(numMatls);
 
-   Ghost::GhostType  gnone = Ghost::None;
+    Ghost::GhostType  gnone = Ghost::None;
 
-   for(int p=0;p<patches->size();p++){
-    const Patch* patch = patches->get(p);
-    Vector dx = patch->dCell();
-    double cell_vol = dx.x()*dx.y()*dx.z();
-    constNCVariable<double> NC_CCweight;
-    constNCVariable<int> alphaMaterial;
-    constNCVariable<Vector> normAlphaToBeta;
-    old_dw->get(NC_CCweight,      lb->NC_CCweightLabel,     0,patch, gnone, 0);
-    new_dw->get(alphaMaterial,    lb->gAlphaMaterialLabel,  0,patch, gnone, 0);
-    new_dw->get(normAlphaToBeta,  lb->gNormAlphaToBetaLabel,0,patch, gnone, 0);
+    for(int p=0;p<patches->size();p++){
+      const Patch* patch = patches->get(p);
+      Vector dx = patch->dCell();
+      double cell_vol = dx.x()*dx.y()*dx.z();
+      constNCVariable<double> NC_CCweight;
+      constNCVariable<int> alphaMaterial;
+      constNCVariable<Vector> normAlphaToBeta;
+      old_dw->get(NC_CCweight,      lb->NC_CCweightLabel,     0,patch, gnone, 0);
+      new_dw->get(alphaMaterial,    lb->gAlphaMaterialLabel,  0,patch, gnone, 0);
+      new_dw->get(normAlphaToBeta,  lb->gNormAlphaToBetaLabel,0,patch, gnone, 0);
 
-    delt_vartype delT;
-    old_dw->get(delT, lb->delTLabel, getLevel(patches));
+      delt_vartype delT;
+      old_dw->get(delT, lb->delTLabel, getLevel(patches));
 
-    // First, calculate the gradient of the mass everywhere
-    // normalize it, and stick it in surfNorm
-    for(int m=0;m<numMatls;m++){
-      int dwi = matls->get(m);
-      new_dw->get(gmass[m],          lb->gMassLabel,     dwi, patch, gnone, 0);
-      new_dw->get(gvolume[m],        lb->gVolumeLabel,   dwi, patch, gnone, 0);
-      new_dw->get(gmatlprominence[m],lb->gMatlProminenceLabel,
+      // First, calculate the gradient of the mass everywhere
+      // normalize it, and stick it in surfNorm
+      for(int m=0;m<numMatls;m++){
+        int dwi = matls->get(m);
+        new_dw->get(gmass[m],          lb->gMassLabel,     dwi, patch, gnone, 0);
+        new_dw->get(gvolume[m],        lb->gVolumeLabel,   dwi, patch, gnone, 0);
+        new_dw->get(gmatlprominence[m],lb->gMatlProminenceLabel,
                                                          dwi, patch, gnone, 0);
-      new_dw->getModifiable(gvelocity[m],   lb->gVelocityLabel,      dwi,patch);
-    }  // loop over matls
+        new_dw->getModifiable(gvelocity[m],   lb->gVelocityLabel,      dwi,patch);
+      }  // loop over matls
 
-    for(NodeIterator iter = patch->getNodeIterator(); !iter.done();iter++){
-      IntVector c = *iter;
-      Vector centerOfMassVelocity(0.,0.,0.);
-      double centerOfMassMass=0.0; 
-      double totalNodalVol=0.0; 
-      int alpha=alphaMaterial[c];
-      // Need to think whether centerOfMass(Stuff) should
-      // only include current material and alpha material
-      // Why include materials that may be putting mass on the node
-      // but aren't near enough to be in proper contact.
-      for(int n = 0; n < numMatls; n++){
-        if(!d_matls.requested(n)) continue;
-        centerOfMassVelocity+=gvelocity[n][c] * gmass[n][c];
-        centerOfMassMass+= gmass[n][c]; 
-        totalNodalVol+=gvolume[n][c]*8.0*NC_CCweight[c];
-      }
-
-      if(alpha>=0){  // Only work on nodes where alpha!=-99
-        centerOfMassVelocity/=centerOfMassMass;
-
-        if(flag->d_axisymmetric){
-          // Nodal volume isn't constant for axisymmetry
-          // volume = r*dr*dtheta*dy  (dtheta = 1 radian)
-          double r = min((patch->getNodePosition(c)).x(),.5*dx.x());
-          cell_vol =  r*dx.x()*dx.y();
+      for(NodeIterator iter = patch->getNodeIterator(); !iter.done();iter++){
+        IntVector c = *iter;
+        Vector centerOfMassVelocity(0.,0.,0.);
+        double centerOfMassMass=0.0;
+        double totalNodalVol=0.0;
+        int alpha=alphaMaterial[c];
+        // Need to think whether centerOfMass(Stuff) should
+        // only include current material and alpha material
+        // Why include materials that may be putting mass on the node
+        // but aren't near enough to be in proper contact.
+        for(int n = 0; n < numMatls; n++){
+          if(!d_matls.requested(n)) continue;
+          centerOfMassVelocity+=gvelocity[n][c] * gmass[n][c];
+          centerOfMassMass+= gmass[n][c];
+          totalNodalVol+=gvolume[n][c]*8.0*NC_CCweight[c];
         }
 
-        // Only apply contact if the node is full relative to a constraint
-        if((totalNodalVol/cell_vol) > d_vol_const){
+        if(alpha>=0){  // Only work on nodes where alpha!=-99
+          centerOfMassVelocity/=centerOfMassMass;
 
-          // Loop over materials.  Only proceed if velocity field mass
-          // is nonzero (not numerical noise) and the difference from
-          // the centerOfMassVelocity is nonzero (More than one velocity
-          // field is contributing to grid vertex).
-          for(int n = 0; n < numMatls; n++){
-           if(!d_matls.requested(n)) continue;
-           if(n==alpha) continue;
-            double mass=gmass[n][c];
-            if(mass>1.e-16){ // There is mass of material beta at this node
-              // Check relative separation of the material prominence
-              double separation = gmatlprominence[n][c] - 
-                                  gmatlprominence[alpha][c];
-              // If that separation is negative, the matls have overlapped
+          if(flag->d_axisymmetric){
+            // Nodal volume isn't constant for axisymmetry
+            // volume = r*dr*dtheta*dy  (dtheta = 1 radian)
+            double r = min((patch->getNodePosition(c)).x(),.5*dx.x());
+            cell_vol =  r*dx.x()*dx.y();
+          }
+
+          // Only apply contact if the node is full relative to a constraint
+          if((totalNodalVol/cell_vol) > d_vol_const){
+
+            // Loop over materials.  Only proceed if velocity field mass
+            // is nonzero (not numerical noise) and the difference from
+            // the centerOfMassVelocity is nonzero (More than one velocity
+            // field is contributing to grid vertex).
+            for(int n = 0; n < numMatls; n++){
+              if(!d_matls.requested(n)) continue;
+              if(n==alpha) continue;
+              double mass=gmass[n][c];
+              if(mass>1.e-16){ // There is mass of material beta at this node
+                // Check relative separation of the material prominence
+                double separation = gmatlprominence[n][c] - gmatlprominence[alpha][c];
+                // If that separation is negative, the matls have overlapped
 //              if(separation <= 0.0){
-              if(separation <= 0.01*dx.x()){
-               Vector deltaVelocity=gvelocity[n][c] - centerOfMassVelocity;
-               Vector normal = -1.0*normAlphaToBeta[c];
-               double normalDeltaVel=Dot(deltaVelocity,normal);
-               Vector Dv(0.,0.,0.);
-               if(normalDeltaVel > 0.0){
-                 Vector normal_normaldV = normal*normalDeltaVel;
-                 Vector dV_normalDV = deltaVelocity - normal_normaldV;
-                 Vector surfaceTangent = dV_normalDV/(dV_normalDV.length()+1.e-100);
-                 double tangentDeltaVelocity=Dot(deltaVelocity,surfaceTangent);
-                 double frictionCoefficient=
-                         Min(d_mu,tangentDeltaVelocity/fabs(normalDeltaVel));
+                if(separation <= 0.01*dx.x()){
+                  Vector deltaVelocity=gvelocity[n][c] - centerOfMassVelocity;
+                  Vector normal = -1.0*normAlphaToBeta[c];
+                  double normalDeltaVel=Dot(deltaVelocity,normal);
+                  Vector Dv(0.,0.,0.);
+                  if(normalDeltaVel > 0.0){
+                    Vector normal_normaldV = normal*normalDeltaVel;
+                    Vector dV_normalDV = deltaVelocity - normal_normaldV;
+                    Vector surfaceTangent = dV_normalDV/(dV_normalDV.length()+1.e-100);
+                    double tangentDeltaVelocity=Dot(deltaVelocity,surfaceTangent);
+                    double frictionCoefficient = Min(d_mu,tangentDeltaVelocity/fabs(normalDeltaVel));
 
-                 // Calculate velocity change needed to enforce contact
-                 Dv = -normal_normaldV
-                   -surfaceTangent*frictionCoefficient*fabs(normalDeltaVel);
+                    // Calculate velocity change needed to enforce contact
+                    Dv = -normal_normaldV - surfaceTangent*frictionCoefficient*fabs(normalDeltaVel);
 
 #if 0
                 // Define contact algorithm imposed strain, find maximum
@@ -205,20 +202,20 @@ void FrictionContactLR::exMomInterpolated(const ProcessorGroup*,
                    Dv=Dv*ff;
                 }
 #endif 
-                double ff = max(1.0,(.01*dx.x() - separation)/.01*dx.x());
-                Dv=Dv*ff;
-                Vector DvAlpha = -Dv*gmass[n][c]/gmass[alpha][c];
-                gvelocity[n][c]    +=Dv;
-                gvelocity[alpha][c]+=DvAlpha;
-              } // if (relative velocity) * normal < 0
-             }  // if separation
-            }   // if !compare && !compare
-          }     // matls
-        }       // if (volume constraint)
-      }         // if(alpha > 0)
-    }           // NodeIterator
-  }             // patches
- }              // if d_oneOrTwoStep
+                    double ff = max(1.0,(.01*dx.x() - separation)/.01*dx.x());
+                    Dv=Dv*ff;
+                    Vector DvAlpha = -Dv*gmass[n][c]/gmass[alpha][c];
+                    gvelocity[n][c]    +=Dv;
+                    gvelocity[alpha][c]+=DvAlpha;
+                  } // if (relative velocity) * normal < 0
+                }  // if separation
+              }   // if mass
+            }     // matls
+          }       // if (volume constraint)
+        }         // if(alpha > 0)
+      }           // NodeIterator
+    }             // patches
+  }              // if d_oneOrTwoStep
 }
 
 void FrictionContactLR::exMomIntegrated(const ProcessorGroup*,
