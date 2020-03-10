@@ -124,6 +124,7 @@ void LRContact_CoulombAdhesive::exMomInterpolated(const ProcessorGroup*,
       			   double dvDott = matlTangent.safe_normalize(1.0e-20);
 //      			   double mu_prime;
 //      			   double mag_dvDotn = fabs(dvDotn);
+      			   double v_Stick_Ac_dt = dvDott;
       			   if (dvDotn > 0.0) { // material in compression
       				 // Push normal to enforce contact
 //      				 mu_prime = Min(d_mu,dvDott/mag_dvDotn);
@@ -132,8 +133,9 @@ void LRContact_CoulombAdhesive::exMomInterpolated(const ProcessorGroup*,
       				 // F/Area * Area * delta_time = m*acceleration * delta_time = m*v = momentum
       				 // mass * dvDott = Stick * Area * delta_time
       				 // Stick = area * delta_time / (mass * velocity)
-      				 double Stick_Ac_dt = matlMass * dvDott;
-      				 double Slide_Ac_dt = d_ShearAdhesion * contactArea * delT - d_mu * matlMass * dvDotn;
+      				 double inv_contactArea_times_time = 1.0/(contactArea * delT);
+      				 double v_Slide_Ac_dt = (d_ShearAdhesion)/(matlMass) - d_mu * dvDotn*inv_contactArea_times_time;
+      				 double mu_prime_Ac_dt = Min(v_Stick_Ac_dt,v_Slide_Ac_dt);
       			   } else { // dvDotn < 0.0 means material is in tension
 
       			   }
