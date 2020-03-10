@@ -27,6 +27,7 @@ void LRContact_CoulombAdhesive::exMomInterpolated(const ProcessorGroup*,
 	 if (dx.x() == dx.y() == dx.z()) equalGrid = true;
 	 double hPerp = dx.x();
 	 double cellVolume = dx.x()*dx.y()*dx.z();
+	 double invCellVolume = 1.0/cellVolume;
 
 
      constNCVariable<double> NC_CCweight;
@@ -40,22 +41,20 @@ void LRContact_CoulombAdhesive::exMomInterpolated(const ProcessorGroup*,
      delt_vartype delT;
      old_dw->get(delT, lb->delTLabel, getLevel(patches));
 
-     // First, calculate the gradient of the mass everywhere
-     // normalize it, and stick it in surfNorm
+     // Load per material arrays.
      for(int m=0;m<numMatls;m++){
        int dwi = matls->get(m);
        new_dw->get(gmass[m],          lb->gMassLabel,     			dwi, patch, gnone, 0);
        new_dw->get(gvolume[m],        lb->gVolumeLabel,   			dwi, patch, gnone, 0);
        new_dw->get(gmatlprominence[m],lb->gMatlProminenceLabel,		dwi, patch, gnone, 0);
        new_dw->getModifiable(gvelocity[m],   lb->gVelocityLabel,	dwi, patch );
-     }  // loop over matls
-
+     }
 
      const Vector projDummy(1.0, 1.0, 1.0);  // Dummy vector to decompose normals and tangents.
      for(NodeIterator iter = patch->getNodeIterator(); !iter.done();iter++)  {
        IntVector nodeIndex = *iter;
        int alpha = alphaMaterial[nodeIndex];
-       if( alpha >= 0 )  {  // Only work on nodes where alpha!=-99
+       if( alpha >= 0 )  {  // Only work on nodes where alpha!=-99 (i.e. multipler materials)
 
     	 // Calculate nodal volume for axisymmetric problems
       	 if(flag->d_axisymmetric)	{  // Nodal volume isn't constant for axisymmetry
@@ -64,11 +63,11 @@ void LRContact_CoulombAdhesive::exMomInterpolated(const ProcessorGroup*,
       	   cellVolume =  r*dx.x()*dx.y();
      	 }
 
+      	 double nodalWeighting = 8.0 * NC_CCweight[nodeIndex];
     	 // Calculate nodal CoM quantities
-      	 Vector p_CoM(0.0, 0.0, 0.0); // center of mass momeentum
+      	 Vector p_CoM(0.0, 0.0, 0.0); // center of mass momentum
       	 double m_CoM=0.0;            // nodal mass for center of mass calcs
       	 double nodalVolume = 0.0;    // total nodal volume
-      	 double nodalWeighting = 8.0 * NC_CCweight[nodeIndex];
       	 for (int matlIndex = 0; matlIndex < numMatls; ++matlIndex) {
            if (d_matls.requested(matlIndex)) {
       		 p_CoM += gvelocity[matlIndex][nodeIndex] * gmass[matlIndex][nodeIndex];
@@ -80,20 +79,23 @@ void LRContact_CoulombAdhesive::exMomInterpolated(const ProcessorGroup*,
       	 Vector v_CoM = p_CoM/m_CoM;
 
       	 // Only apply contact if the node is full relative to a constraint
-      	 if ( (nodalVolume/cellVolume) > d_vol_const) {
+      	 if ( (nodalVolume*invCellVolume) > d_vol_const) {
       	   // Only directions for normal are +/- the alpha normal, so do the vector mechanics once.
       	   Vector alphaNormal = normAlphaToBeta[nodeIndex];
       	   double alphaProminence = gmatlprominence[alpha][nodeIndex];
       	   alphaNormal.safe_normalize();  // Ensure the alpha normal is unit
-      	   Vector alphaTangent = (projDummy - Dot(projDummy,alphaNormal)*alphaNormal);
-      	   alphaTangent.safe_normalize();
+
+      	   // Determine the perpendicular distance metric only if grid is not uniform.
       	   if (!equalGrid) { // Need to account for non-uniform grid spacings.
+          	 Vector alphaTangent = (projDummy - Dot(projDummy,alphaNormal)*alphaNormal);
+          	 alphaTangent.safe_normalize();
       		 Vector a = alphaTangent / dx;
       		 a *= a;
       		 Vector b = Cross(alphaNormal, alphaTangent)/dx;
       		 b *= b;
       		 hPerp = cellVolume * sqrt(Dot(a,a)*Dot(b,b));
       	   }
+
       	   double separationOffset = 0.01*hPerp;
 
       	   // Material normal and alpha normal are in opposite directions
@@ -101,10 +103,28 @@ void LRContact_CoulombAdhesive::exMomInterpolated(const ProcessorGroup*,
       	   Vector matlNormal = -alphaNormal;
       	   for (int matlIndex = 0; matlIndex < numMatls; ++matlIndex) {
       		 double matlMass = gmass[matlIndex][nodeIndex];
+      		 Vector v_matl = gvelocity[matlIndex][nodeIndex];
+
       		 if (d_matls.requested(matlIndex) && (matlIndex != alpha) && (matlMass > 1.0e-16)) {
       		   // Calculate surface separation
       		   double separation = gmatlprominence[matlIndex][nodeIndex] - alphaProminence;
-      		   bool contact = (separation < separationOffset);
+      		   bool contact = (separation <= separationOffset);
+      		   if (contact) {
+      			   Vector delta_v = v_matl - v_CoM;
+      			   double dvDotn = Dot(delta_v,matlNormal);
+      			   Vector v_adjusted(0.0, 0.0, 0.0);
+      			   Vector v_normal_correct = matlNormal * dvDotn;
+      			   Vector matlTangent = delta_v - v_normal_correct;
+      			   double dvDott = matlTangent.safe_normalize(1.0e-20);
+      			   double mu_prime;
+      			   double mag_dvDotn = fabs(dvDotn);
+      			   if (dvDotn > 0.0) { // material in compression
+      				 // Push normal to enforce contact
+      				 mu_prime = Min(d_mu,dvDott/mag_dvDotn);
+      			   } else { // dvDotn < 0.0 means material is in tension
+
+      			   }
+      		   }
 
       		   Vector delta_p = matlMass * (v_CoM - gvelocity[matlIndex][nodeIndex]);
       		   double dpDotn = Dot(delta_p,matlNormal);  // d_n = -N*Ac*dt
@@ -123,6 +143,7 @@ void LRContact_CoulombAdhesive::exMomInterpolated(const ProcessorGroup*,
 			   double A_c = sqrt(2.0*nodalVolume*minVolume)/hPerp;
       		   if (contact) {
       			   if (compression) {
+      				 Vector v_stick =
       				 double S_slide = d_ShearAdhesion * A_c * delT - d_mu * dpDotn;
       				 double S_coeff = Min(dpDott,S_slide);
 
@@ -142,33 +163,7 @@ void LRContact_CoulombAdhesive::exMomInterpolated(const ProcessorGroup*,
       		   double stress_denom = 1.0/(A_c * delT);
       		   double S_slide_ac_dt = - d_mu * dpDotn;
 
-
-      		   Vector v_Correct(0.0, 0.0, 0.0);
-
-      		   if (contact) {
-      			   if (compression) { // Stick or slide
-
-      			   }
-      			   else { // dvDotN < 0.0; tension loading check adhesion; stick or free
-
-      			   }
-      		   } else {
-      			   // Check for adhesion; if not then free
-      		   }
       		   // Materials in compressive contact if separation < saparationOffset && dvDotN > 0.0
-      		   bool compressiveContact = (separation < separationOffset) && (dvDotN > 0.0);
-      		   double tangent_ratio = S_stick/S_a;
-      		   double normal_ratio = N/N_a;
-      		   if (compressiveContact) {
-
-      		   } else {
-      			   double S_ratio = S_stick/S_a;
-      			   double N_Ratio = N/N_a;
-
-      			   if ( (S_ratio*S_ratio + N_Ratio*N_Ratio) <= 1.0 ) { // Elliptic adhesion condition; adhesion/tension maintains stick
-
-      			   }
-      		   }
       		   // delta_v = Dot(dV,n)n + Dot(dV,t)t
       		   // delta_v - Dot(delta_v,n)*n = Dot(delta_v,t)t
       		   // Dot(delta_v,t)t = delta_v - Dot(delta_v,n)*n = delta_v - dvDotN*n = dvDotT*t
@@ -183,9 +178,6 @@ void LRContact_CoulombAdhesive::exMomInterpolated(const ProcessorGroup*,
       		   // N_a = adhesive strength
       		   // Materials in -adhesive- contact if
 
-      		   Vector dv_Tangent = delta_v - dvDotN*matlNormal; // == Dot(dv,tangent)*tangent
-      		   double S_stick = dv_Tangent.length();
-      		   dv_Tangent /= (S_stick + 1.e-100);
       		 }
       	   }
 

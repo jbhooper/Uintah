@@ -118,7 +118,7 @@ public:
   inline Vector operator-(const Point&) const;
   inline Vector& operator-=(const Vector&);
   inline double normalize();
-  inline double safe_normalize();
+  inline double safe_normalize(double epsilon = 1.0e-12);
   Vector normal() const;
   friend inline Vector Cross(const Vector&, const Vector&);
   friend inline Vector Abs(const Vector&);
@@ -478,9 +478,9 @@ double Vector::normalize()
 }
 
 inline
-double Vector::safe_normalize()
+double Vector::safe_normalize(double epsilon)
 {
-  double l=Sqrt(x_*x_ + y_*y_ + z_*z_ + 1.0e-12);
+  double l=Sqrt(x_*x_ + y_*y_ + z_*z_ + epsilon);
   x_/=l;
   y_/=l;
   z_/=l;
