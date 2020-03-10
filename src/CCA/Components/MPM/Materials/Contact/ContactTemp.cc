@@ -98,6 +98,7 @@ void LRContact_CoulombAdhesive::exMomInterpolated(const ProcessorGroup*,
 
       	   double separationOffset = 0.01*hPerp;
 
+
       	   // Material normal and alpha normal are in opposite directions
       	   // Tangents are in the same direction.
       	   Vector matlNormal = -alphaNormal;
