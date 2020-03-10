@@ -109,6 +109,11 @@ void LRContact_CoulombAdhesive::exMomInterpolated(const ProcessorGroup*,
       		   // Calculate surface separation
       		   double separation = gmatlprominence[matlIndex][nodeIndex] - alphaProminence;
       		   bool contact = (separation <= separationOffset);
+	      	   // Find the contact area for this material.
+			   double matlVolume = gvolume[matlIndex][nodeIndex] * nodalWeighting;
+			   double remainderVolume = nodalVolume - matlVolume;
+			   double minVolume = Min(matlVolume,remainderVolume);
+			   double contactArea = sqrt(2.0*nodalVolume*minVolume)/hPerp;
       		   if (contact) {
       			   Vector delta_v = v_matl - v_CoM;
       			   double dvDotn = Dot(delta_v,matlNormal);
@@ -116,11 +121,18 @@ void LRContact_CoulombAdhesive::exMomInterpolated(const ProcessorGroup*,
       			   Vector v_normal_correct = matlNormal * dvDotn;
       			   Vector matlTangent = delta_v - v_normal_correct;
       			   double dvDott = matlTangent.safe_normalize(1.0e-20);
-      			   double mu_prime;
-      			   double mag_dvDotn = fabs(dvDotn);
+//      			   double mu_prime;
+//      			   double mag_dvDotn = fabs(dvDotn);
       			   if (dvDotn > 0.0) { // material in compression
       				 // Push normal to enforce contact
-      				 mu_prime = Min(d_mu,dvDott/mag_dvDotn);
+//      				 mu_prime = Min(d_mu,dvDott/mag_dvDotn);
+      				 // dvDotn = -N * contactArea * delta_time
+      				 // d_ShearAdhesion units = pressure = F/Area
+      				 // F/Area * Area * delta_time = m*acceleration * delta_time = m*v = momentum
+      				 // mass * dvDott = Stick * Area * delta_time
+      				 // Stick = area * delta_time / (mass * velocity)
+      				 double Stick_Ac_dt = matlMass * dvDott;
+      				 double Slide_Ac_dt = d_ShearAdhesion * contactArea * delT - d_mu * matlMass * dvDotn;
       			   } else { // dvDotn < 0.0 means material is in tension
 
       			   }
@@ -143,6 +155,9 @@ void LRContact_CoulombAdhesive::exMomInterpolated(const ProcessorGroup*,
 			   double A_c = sqrt(2.0*nodalVolume*minVolume)/hPerp;
       		   if (contact) {
       			   if (compression) {
+      				 double S_stick_Ac_dt = dpDott;
+      				 double Slide_Ac_dt = d_ShearAdhesion * A_c * delT - d_mu * m * dpDotn;
+      				 double N_Ac_dt = dpDotn;
       				 Vector v_stick =
       				 double S_slide = d_ShearAdhesion * A_c * delT - d_mu * dpDotn;
       				 double S_coeff = Min(dpDott,S_slide);
