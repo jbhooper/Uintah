@@ -33,6 +33,7 @@ SRCDIR   := CCA/Components/MPM/Materials/Contact
 SRCS     += \
 	$(SRCDIR)/SpecifiedBodyContact.cc \
 	$(SRCDIR)/SingleVelContact.cc \
+	$(SRCDIR)/LRContact_CoulombAdhesive.cc \
 	$(SRCDIR)/FrictionContactBard.cc  \
 	$(SRCDIR)/FrictionContactLR.cc  \
 	$(SRCDIR)/NodalSVFContact.cc \

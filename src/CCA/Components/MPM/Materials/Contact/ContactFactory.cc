@@ -31,6 +31,7 @@
 #include <CCA/Components/MPM/Materials/Contact/SpecifiedBodyContact.h>
 #include <CCA/Components/MPM/Materials/Contact/ApproachContact.h>
 #include <CCA/Components/MPM/Materials/Contact/CompositeContact.h>
+#include <CCA/Components/MPM/Materials/Contact/LRContact_CoulombAdhesive.h>
 #include <Core/Malloc/Allocator.h>
 #include <Core/ProblemSpec/ProblemSpec.h>
 #include <Core/Exceptions/ProblemSetupException.h>
@@ -74,6 +75,10 @@ Contact* ContactFactory::create(const ProcessorGroup* myworld,
      }
      else if (con_type == "friction_LR") {
        contact_list->add(scinew FrictionContactLR(myworld,child,ss,lb,flag));
+       useLogisticRegression=true;
+     }
+     else if (con_type == "LR_coulomb_adhesive") {
+       contact_list->add(scinew LRContact_CoulombAdhesive(myworld,child,ss,lb,flag));
        useLogisticRegression=true;
      }
      else if (con_type == "friction_bard") {

@@ -82,8 +82,13 @@ KEYWORDS
          
          // Coefficient of friction
          double d_mu;
-         // Adhesive yield strength
-         double d_adhesiveYield;
+         // Shear adhesive strength
+         double d_shearAdhesion;
+         // Normal adhesive strength
+         double d_normalAdhesion;
+		 // Adhesive layer fractional thickness
+         bool d_scaleAdhesion;
+		 double d_adhesiveThickness; //Fraction of cell
          // Nodal volume fraction that must occur before contact is applied
          double d_vol_const;
          // Separation Factor to consider materials not in contact.  (Not currently used)

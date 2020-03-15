@@ -5998,7 +5998,6 @@ void SerialMPM::computeLogisticRegression(const ProcessorGroup *,
       new_dw->allocateAndPut(d_x_p_dot_n[m],lb->gMatlProminenceLabel,dwi,patch);
 
       d_x_p_dot_n[m].initialize(-99.);
-
       NCVariable<double> projMax, projMin;
       new_dw->allocateTemporary(projMax,                  patch,    gnone);
       new_dw->allocateTemporary(projMin,                  patch,    gnone);
