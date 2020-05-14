@@ -4,7 +4,7 @@
 /*
  * The MIT License
  *
- * Copyright (c) 1997-2019 The University of Utah
+ * Copyright (c) 1997-2020 The University of Utah
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -436,6 +436,7 @@ private:
 
     const int istart = 0;
     const int iend = m_eqn_names.size();
+
     for (int ieqn = istart; ieqn < iend; ieqn++ ){
 
       double scalar_init_value = m_init_value[ieqn];

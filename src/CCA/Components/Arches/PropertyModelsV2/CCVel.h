@@ -74,6 +74,8 @@ private:
 
     void compute_velocities( const Patch* patch, ArchesTaskInfoManager* tsk_info );
 
+    void compute_vorticity( const Patch* patch, ArchesTaskInfoManager* tsk_info );
+
   };
 }
 

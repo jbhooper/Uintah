@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright (c) 1997-2019 The University of Utah
+ * Copyright (c) 1997-2020 The University of Utah
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -364,7 +364,6 @@ __global__ void rayTraceKernel( dim3 dimGrid,
 __constant__ levelParams d_levels[d_MAXLEVELS];
 
 template< class T>
-__global__
 __global__
 #if NDEBUG  //Uinth has a DNDEBUG compiler defined flag in normal trunk builds.  Debug builds have no compiler flags we can capture.
 __launch_bounds__(640, 1) // For 96 registers with 320 threads.  Allows two kernels to fit within an SM.
@@ -1807,7 +1806,7 @@ __host__ void launchRayTraceKernel(DetailedTask* dtask,
   }
   dtask->addTempHostMemoryToBeFreedOnCompletion(h_debugRandNums);
   cudaMemcpyAsync(d_debugRandNums, h_debugRandNums, randNumsByteSize, cudaMemcpyHostToDevice, *stream );
-  
+
   rayTraceKernel< T ><<< dimGrid, dimBlock, 0, *stream >>>( dimGrid,
                                                             dimBlock,                                               
                                                             matlIndx,

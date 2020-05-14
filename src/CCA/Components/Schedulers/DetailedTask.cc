@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright (c) 1997-2019 The University of Utah
+ * Copyright (c) 1997-2020 The University of Utah
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -769,7 +769,7 @@ DetailedTask::checkCudaStreamDoneForThisTask( unsigned int device_id ) const
     SCI_THROW(InternalError("Detected CUDA kernel execution failure on Task: " + getName() , __FILE__, __LINE__));
     return false;
   } else { //other error
-    printf("Waiting for 60\n");
+    printf("\nA CUDA error occurred with error code %d.\n\nWaiting for 60 seconds\n", retVal);
 
     int sleepTime = 60;
 
