@@ -194,9 +194,14 @@ DetailedTask::scrub( std::vector<OnDemandDataWarehouseP> & dws )
     TypeDescription::Type type = req->m_var->typeDescription()->getType();
     Patch::VariableBasis basis = Patch::translateTypeToBasis(type, false);
     if (type != TypeDescription::ReductionVariable && type != TypeDescription::SoleVariable) {
-      int dw = req->mapDataWarehouse();
+      int dw = req->mapDataWarehouse();  // Get data warehouse currently
 
       DataWarehouse::ScrubMode scrubmode = dws[dw]->getScrubMode();
+      if (g_scrubbing_dbg && (req->m_var->getName() == g_var_scrub_dbg || g_var_scrub_dbg == "")) {
+    	  DOUT(g_scrubbing_dbg, " Current scrub mode: " <<
+    		    (scrubmode == DataWarehouse::ScrubNone ? " None" :
+    		    		(scrubmode == DataWarehouse::ScrubComplete ? " Complete" : "NonPermanent")) << "\n");
+      }
       if (scrubmode == DataWarehouse::ScrubComplete
           || (scrubmode == DataWarehouse::ScrubNonPermanent && initialRequires.find(req->m_var) == initialRequires.end())) {
 

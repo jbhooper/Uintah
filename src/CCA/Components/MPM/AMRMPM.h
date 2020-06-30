@@ -71,7 +71,7 @@ public:
                                   SchedulerP& sched);
 
   virtual void scheduleComputeStableTimeStep(const LevelP& level,
-                                             SchedulerP&);
+                                             SchedulerP& sched);
          
   virtual void scheduleTimeAdvance(const LevelP& level, 
                                    SchedulerP&);

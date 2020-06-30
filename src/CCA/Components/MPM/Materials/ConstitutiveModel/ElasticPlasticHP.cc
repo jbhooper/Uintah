@@ -559,6 +559,9 @@ ElasticPlasticHP::addComputesAndRequires(Task* task,
   task->computes(lb->pLocalizedMPMLabel_preReloc, matlset);
   task->computes(pEnergyLabel_preReloc,         matlset);
 
+  if (flag->d_with_color) {
+	  task->modifies(lb->pColorLabel_preReloc, matlset);
+  }
   // Add internal evolution variables computed by flow model
   d_flow->addComputesAndRequires(task, matl, patches);
   
@@ -688,6 +691,11 @@ ElasticPlasticHP::computeStressTensor(const PatchSubset* patches,
     new_dw->allocateAndPut(p_q,   lb->p_qLabel_preReloc,          pset);
     new_dw->allocateAndPut(pEnergy_new, pEnergyLabel_preReloc,    pset);
 
+    ParticleVariable<double> pColor_new;
+    if (flag->d_with_color) {
+        new_dw->getModifiable(pColor_new, lb->pColorLabel_preReloc,   pset);
+    }
+
     
     d_flow     ->getInternalVars(pset, old_dw);
     d_devStress->getInternalVars(pset, old_dw);
@@ -732,6 +740,7 @@ ElasticPlasticHP::computeStressTensor(const PatchSubset* patches,
           pLocalized_new[idx]=-999;
           tensorL=zero;
           tensorF_new.Identity();
+          pColor_new[idx] = 100;
       }
 
       // Calculate the current density and deformed volume

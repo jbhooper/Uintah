@@ -84,6 +84,7 @@
 #include <Core/ProblemSpec/ProblemSpec.h>                // for Vector, IntVector, etc
 #include <Core/ProblemSpec/ProblemSpecP.h>               // for ProblemSpecP
 #include <Core/Util/DebugStream.h>                       // for DebugStream
+#include <Core/Util/DOUT.hpp>
 #include <Core/Util/Handle.h>                            // for Handle
 
 #include <algorithm>                                     // for max, min
@@ -457,6 +458,10 @@ void AMRMPM::scheduleInitialize(const LevelP& level, SchedulerP& sched)
     proc0cout << "DontDoMPMOnLevel = " << level->getIndex() << endl;
   }
   
+  // Loop AMR into debug mechanics.  JBH 6/2020
+  const PatchSet* patches = level->eachPatch();
+  printSchedule(patches,cout_doing,"AMRMPM::scheduleInitialize");
+
   if (!flags->doMPMOnLevel(level->getIndex(), level->getGrid()->numLevels()))
     return;
   Task* t = scinew Task("AMRMPM::actuallyInitialize",
@@ -479,6 +484,7 @@ void AMRMPM::scheduleInitialize(const LevelP& level, SchedulerP& sched)
   t->computes(lb->pVelGradLabel);
   t->computes(lb->pTemperatureGradientLabel);
   t->computes(lb->pSizeLabel);
+  t->computes(lb->pLocalizedMPMLabel);
   t->computes(lb->pRefinedLabel);
   t->computes(lb->pLastLevelLabel);
   t->computes(lb->delTLabel,level.get_rep());
@@ -519,7 +525,7 @@ void AMRMPM::scheduleInitialize(const LevelP& level, SchedulerP& sched)
   }
 
   unsigned int numMPM = m_materialManager->getNumMatls( "MPM" );
-  const PatchSet* patches = level->eachPatch();
+
   for(unsigned int m = 0; m < numMPM; m++){
     MPMMaterial* mpm_matl = (MPMMaterial*) m_materialManager->getMaterial( "MPM", m);
     ConstitutiveModel* cm = mpm_matl->getConstitutiveModel();
@@ -569,9 +575,11 @@ void AMRMPM::schedulePrintParticleCount(const LevelP& level,
 }
 //______________________________________________________________________
 //
-void AMRMPM::scheduleComputeStableTimeStep(const LevelP&,
-                                              SchedulerP&)
+void AMRMPM::scheduleComputeStableTimeStep(const LevelP& level,
+                                              SchedulerP& sched)
 {
+	cout_doing << d_myworld->myRank() << " MPM::scheduleComputeStableTimeStep \t\t\t\tL-" << level->getIndex() << endl;
+
   // Nothing to do here - delt is computed as a by-product of the
   // constitutive model
 }
@@ -629,13 +637,17 @@ void AMRMPM::scheduleTimeAdvance(const LevelP & level,
   for (int l = 0; l < maxLevels; l++) {
     const LevelP& level = grid->getLevel(l);
     const PatchSet* patches = level->eachPatch();
-    scheduleNormalizeNodalVelTempConc(sched, patches, matls);
+    scheduleNormalizeNodalVelTempConc(		sched, patches, matls);
     if(flags->d_computeNormals){
-      scheduleComputeNormals(         sched, patches, matls);
+      scheduleComputeNormals(         		sched, patches, matls);
     }
-    scheduleExMomInterpolated(        sched, patches, matls);
+    if(flags->d_useLogisticRegression) {
+    	scheduleFindSurfaceParticles( 		sched, patches, matls);
+    	scheduleComputeLogisticRegression( 	sched, patches, matls);
+    }
+    scheduleExMomInterpolated(        		sched, patches, matls);
     if(flags->d_doScalarDiffusion){
-      scheduleConcInterpolated(sched, patches, matls);
+      scheduleConcInterpolated(				sched, patches, matls);
     }
   }
 
@@ -714,14 +726,14 @@ void AMRMPM::scheduleTimeAdvance(const LevelP & level,
     const LevelP& level = grid->getLevel(l);
     const PatchSet* patches = level->eachPatch();
     scheduleComputeStressTensor(            sched, patches, matls);
+	scheduleAdjustFailedDeformations_DamageErosionModels(sched, patches, matls, flags);
   }
 
-  // Stress updated above, but deformation gradient not corrected for the reset stress due to erosion.  Fixme! TODO!  JBH
-  for (int l = 0; l < maxLevels; l++) {
-	  const LevelP& level = grid->getLevel(l);
-	  const PatchSet* patches = level->eachPatch();
-	  scheduleAdjustFailedDeformations_DamageErosionModels(sched, patches, matls);
-  }
+//  // Stress updated above, but deformation gradient not corrected for the reset stress due to erosion.  Fixme! TODO!  JBH
+//  for (int l = 0; l < maxLevels; l++) {
+//	  const LevelP& level = grid->getLevel(l);
+//	  const PatchSet* patches = level->eachPatch();
+//  }
 
   if(flags->d_computeScaleFactor){
     for (int l = 0; l < maxLevels; l++) {
@@ -1099,13 +1111,17 @@ void AMRMPM::scheduleComputeStressTensor(SchedulerP& sched,
 
   t->requires(Task::OldDW,lb->simulationTimeLabel);
   t->computes(lb->delTLabel,getLevel(patches));
-  t->computes(lb->StrainEnergyLabel);
+
+  if (flags->d_reductionVars->accStrainEnergy ||
+      flags->d_reductionVars->strainEnergy) {
+	  t->computes(lb->StrainEnergyLabel);
+  }
 
   sched->addTask(t, patches, matls);
   
   //__________________________________
   //  Additional tasks
-  scheduleUpdateStress_DamageErosionModels( sched, patches, matls );
+  scheduleUpdateStress_DamageErosionModels( sched, patches, matls);
 
   if (flags->d_reductionVars->accStrainEnergy) 
     scheduleComputeAccStrainEnergy(sched, patches, matls);
@@ -1214,6 +1230,9 @@ void AMRMPM::scheduleComputeAndIntegrateAcceleration(SchedulerP& sched,
 
   t->computes(lb->gVelocityStarLabel);
   t->computes(lb->gAccelerationLabel);
+  t->computes( VarLabel::find(abortTimeStep_name) );
+  t->computes( VarLabel::find(recomputeTimeStep_name) );
+
 
   // This stuff should probably go in its own task, but for expediency...JG
   if(flags->d_doScalarDiffusion){
@@ -1271,6 +1290,7 @@ void AMRMPM::scheduleComputeLAndF(SchedulerP& sched,
                                   const MaterialSet* matls)
 
 {
+	// Note:  ComputeLAndF is roughly equivalent in AMR to ComputeParticleGradients in Serial
   const Level* level = getLevel(patches);
   if (!flags->doMPMOnLevel(level->getIndex(), level->getGrid()->numLevels())){
     return;
@@ -1289,6 +1309,7 @@ void AMRMPM::scheduleComputeLAndF(SchedulerP& sched,
   t->requires(Task::OldDW, lb->pMassLabel,                      d_gn);
   t->requires(Task::NewDW, lb->pCurSizeLabel,                   d_gn);
   t->requires(Task::OldDW, lb->pDeformationMeasureLabel,        d_gn);
+  t->requires(Task::OldDW, lb->pLocalizedMPMLabel,              d_gn);
 
   t->computes(lb->pVelGradLabel_preReloc);
   t->computes(lb->pDeformationMeasureLabel_preReloc);
@@ -1445,8 +1466,9 @@ void AMRMPM::scheduleFinalParticleUpdate(SchedulerP& sched,
 
   t->requires(Task::OldDW, lb->delTLabel );
 
-  t->requires(Task::NewDW, lb->pdTdtLabel,           d_gn);
-  t->requires(Task::NewDW, lb->pMassLabel_preReloc,  d_gn);
+  t->requires(Task::NewDW, lb->pdTdtLabel,           		d_gn);
+  t->requires(Task::NewDW, lb->pMassLabel_preReloc,  		d_gn);
+  t->requires(Task::NewDW, lb->pLocalizedMPMLabel_preReloc, d_gn);
 
   t->modifies(lb->pTemperatureLabel_preReloc);
 
@@ -1564,16 +1586,18 @@ void AMRMPM::scheduleRefine(const PatchSet* patches, SchedulerP& sched)
   t->computes(lb->pdTdtLabel);
   t->computes(lb->pVelocityLabel);
   t->computes(lb->pExternalForceLabel);
-  t->computes(lb->diffusion->pExternalScalarFlux_preReloc);
   t->computes(lb->pParticleIDLabel);
   t->computes(lb->pDeformationMeasureLabel);
   t->computes(lb->pStressLabel);
+
+  t->computes(lb->diffusion->pExternalScalarFlux_preReloc);
   if(flags->d_doScalarDiffusion){
     t->computes(lb->diffusion->pConcentration);
     t->computes(lb->diffusion->pConcPrevious);
     t->computes(lb->diffusion->pGradConcentration);
     t->computes(lb->diffusion->pArea);
   }
+
   t->computes(lb->pLastLevelLabel);
   t->computes(lb->pLocalizedMPMLabel);
   t->computes(lb->pRefinedLabel);
@@ -3217,10 +3241,11 @@ void AMRMPM::computeAndIntegrateAcceleration(const ProcessorGroup*,
                                                 DataWarehouse* old_dw,
                                                 DataWarehouse* new_dw)
 {
-  for(int p=0;p<patches->size();p++){
+  const Level* level = getLevel(patches);
+
+  for(int p=0;p<patches->size();p++) {
     const Patch* patch = patches->get(p);
-    printTask(patches, patch,cout_doing,
-                              "Doing AMRMPM::computeAndIntegrateAcceleration");
+    printTask(patches, patch,cout_doing, "Doing AMRMPM::computeAndIntegrateAcceleration");
 
     Vector gravity = flags->d_gravity;
     
@@ -3313,6 +3338,31 @@ void AMRMPM::computeAndIntegrateAcceleration(const ProcessorGroup*,
 #endif 
 /*===========TESTING==========`*/
       }
+
+      // JBH - 6.27.2020  Added code from serial MPM to recompute AMR timesteps based on nodal velocity
+      IntVector lowNode, highNode;
+      level->findInteriorNodeIndexRange(lowNode, highNode);
+      if(flags->d_restartOnLargeNodalVelocity){
+       Vector dxCell = patch->dCell();
+       double cell_size_sq = dxCell.length2();
+       for(NodeIterator iter=patch->getExtraNodeIterator();
+                       !iter.done();iter++){
+        IntVector c = *iter;
+        if(c.x()>lowNode.x() && c.x()<highNode.x() &&
+           c.y()>lowNode.y() && c.y()<highNode.y() &&
+           c.z()>lowNode.z() && c.z()<highNode.z()){
+           if((gvelocity_star[c]*delT).length2() > 0.25*cell_size_sq){
+            cerr << "Aborting timestep, velocity star too large" << endl;
+            cerr << "velocity_star[" << c << "] = " << gvelocity_star[c] << endl;
+            new_dw->put( bool_or_vartype(true),
+                         VarLabel::find(abortTimeStep_name));
+            new_dw->put( bool_or_vartype(true),
+                         VarLabel::find(recomputeTimeStep_name));
+           }
+        }
+       }
+      }
+
       if(flags->d_doScalarDiffusion){
         for(NodeIterator iter=patch->getExtraNodeIterator();
                         !iter.done();iter++){
@@ -3793,8 +3843,8 @@ void AMRMPM::computeLAndF(const ProcessorGroup*,
 
       // _________________________________
       //   Apply Erosion
-//      ErosionModel* em = mpm_matl->getErosionModel();
-//      em->updateVariables_Erosion(pset, pLocalized, pFOld, pFNew, pVelGrad);
+      ErosionModel* em = mpm_matl->getErosionModel();
+      em->updateVariables_Erosion(pset, pLocalized, pFOld, pFNew, pVelGrad);
     }
     delete interpolator;
   }
@@ -4108,6 +4158,7 @@ void AMRMPM::finalParticleUpdate(const ProcessorGroup*,
       MPMMaterial* mpm_matl = (MPMMaterial*) m_materialManager->getMaterial( "MPM",  m );
       int dwi = mpm_matl->getDWIndex();
       // Get the arrays of particle values to be changed
+      constParticleVariable<int> pLocalized;
       constParticleVariable<double> pdTdt,pmassNew;
       ParticleVariable<double> pTempNew;
 
@@ -4116,6 +4167,7 @@ void AMRMPM::finalParticleUpdate(const ProcessorGroup*,
 
       new_dw->get(pdTdt,        lb->pdTdtLabel,                      pset);
       new_dw->get(pmassNew,     lb->pMassLabel_preReloc,             pset);
+      new_dw->get(pLocalized,   lb->pLocalizedMPMLabel_preReloc,     pset);
 
       new_dw->getModifiable(pTempNew, lb->pTemperatureLabel_preReloc,pset);
 
@@ -4127,7 +4179,8 @@ void AMRMPM::finalParticleUpdate(const ProcessorGroup*,
 
         // Delete particles whose mass is too small (due to combustion),
         // whose pLocalized flag has been set to -999 or who have a negative temperature
-        if ((pmassNew[idx] <= flags->d_min_part_mass) || pTempNew[idx] < 0.){
+        if ((pmassNew[idx] <= flags->d_min_part_mass) || pTempNew[idx] < 0. ||
+        		(pLocalized[idx] == -999)){
           delset->addParticle(idx);
         }
 
@@ -4928,6 +4981,7 @@ void AMRMPM::refineGrid(const ProcessorGroup*,
         ParticleSubset* pset = new_dw->createParticleSubset(0, dwi, patch);
 
         // Create arrays for the particle data
+        ParticleVariable<int>    pLoc;
         ParticleVariable<Point>  px;
         ParticleVariable<double> pmass, pvolume, pTemperature;
         ParticleVariable<Vector> pvelocity, pexternalforce, pdisp,pConcGrad;
@@ -4950,6 +5004,7 @@ void AMRMPM::refineGrid(const ProcessorGroup*,
                                                                         pset);
         new_dw->allocateAndPut(pID,            lb->pParticleIDLabel,    pset);
         new_dw->allocateAndPut(pdisp,          lb->pDispLabel,          pset);
+        new_dw->allocateAndPut(pLoc,           lb->pLocalizedMPMLabel,  pset);
         new_dw->allocateAndPut(pLastLevel,     lb->pLastLevelLabel,     pset);
         new_dw->allocateAndPut(pRefined,       lb->pRefinedLabel,       pset);
         new_dw->allocateAndPut(pVelGrad,       lb->pVelGradLabel,       pset);

@@ -741,7 +741,7 @@ SerialMPM::scheduleTimeAdvance(const LevelP & level,
   scheduleInterpolateToParticlesAndUpdate(sched, patches, matls);
   scheduleComputeParticleGradients(       sched, patches, matls);
   scheduleComputeStressTensor(            sched, patches, matls);
-  scheduleAdjustFailedDeformations_DamageErosionModels(sched, patches, matls);
+  scheduleAdjustFailedDeformations_DamageErosionModels(sched, patches, matls, flags);
   scheduleFinalParticleUpdate(            sched, patches, matls);
   scheduleInsertParticles(                    sched, patches, matls);
   if(flags->d_computeScaleFactor){
@@ -1073,7 +1073,7 @@ void SerialMPM::scheduleComputeStressTensor(SchedulerP& sched,
   
   //__________________________________
   //  Additional tasks
-  scheduleUpdateStress_DamageErosionModels( sched, patches, matls );
+  scheduleUpdateStress_DamageErosionModels( sched, patches, matls);
 
   if (flags->d_reductionVars->accStrainEnergy)
     scheduleComputeAccStrainEnergy(sched, patches, matls);
@@ -1250,6 +1250,7 @@ void SerialMPM::scheduleComputeAndIntegrateAcceleration(SchedulerP& sched,
 
   t->computes(lb->gVelocityStarLabel);
   t->computes(lb->gAccelerationLabel);
+  // JBH -- Unset this and see if things go south.  6.2020
   t->computes( VarLabel::find(abortTimeStep_name) );
   t->computes( VarLabel::find(recomputeTimeStep_name) );
 
@@ -1423,6 +1424,7 @@ void SerialMPM::scheduleComputeParticleGradients(SchedulerP& sched,
                                                  const MaterialSet* matls)
 
 {
+	// Note:  ComputeParticleGradients in Serial is roughly equivalent to computeLAndF in AMR
   if (!flags->doMPMOnLevel(getLevel(patches)->getIndex(),
                            getLevel(patches)->getGrid()->numLevels()))
     return;
@@ -5444,6 +5446,12 @@ SerialMPM::refine(const ProcessorGroup*,
 
         mpm_matl->getConstitutiveModel()->initializeCMData(patch,
                                                            mpm_matl,new_dw);
+
+        // These should probably be here too.  JBH - 6.26.2020
+        // Initialize damage/erosion model labels
+        mpm_matl->getDamageModel()->initializeLabels( patch, mpm_matl, new_dw);
+        mpm_matl->getErosionModel()->initializeLabels(patch, mpm_matl, new_dw);
+
 #if 0
           if(flags->d_with_color) {
             ParticleVariable<double> pcolor;
@@ -5684,6 +5692,11 @@ void SerialMPM::scheduleComputeLogisticRegression(SchedulerP   & sched,
                                                   const PatchSet * patches,
                                                   const MaterialSet * matls )
 {
+
+  if (!flags->doMPMOnLevel(getLevel(patches)->getIndex(),
+		                   getLevel(patches)->getGrid()->numLevels()))
+	  return;
+
   printSchedule(patches,cout_doing,"MPM::scheduleComputeLogisticRegression");
   
   Task* t = scinew Task("MPM::computeLogisticRegression", this, 

@@ -258,6 +258,7 @@ MPMFlags::readMPMFlags(ProblemSpecP& ps, Output* dataArchive)
   mpm_flag_ps->get("computeColinearNormals",     d_computeColinearNormals);
   mpm_flag_ps->get("d_ndim",                      d_ndim);
   mpm_flag_ps->get("restartOnLargeNodalVelocity",d_restartOnLargeNodalVelocity);
+  std::cout << " Value for restartOnLargeNodalVelocity: " << d_restartOnLargeNodalVelocity << std::endl;
   if (!d_do_contact_friction){
     d_addFrictionWork = 0.0;
   }

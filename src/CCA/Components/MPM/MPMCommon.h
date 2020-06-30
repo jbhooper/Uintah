@@ -55,13 +55,14 @@ namespace Uintah {
     virtual void cohesiveZoneProblemSetup(const ProblemSpecP& prob_spec,
                                           MPMFlags* flags);
                                           
-    void scheduleUpdateStress_DamageErosionModels(SchedulerP        & sched,
-                                                  const PatchSet    * patches,
-                                                  const MaterialSet * matls );
+    void scheduleUpdateStress_DamageErosionModels(SchedulerP        & 	sched	,
+                                                  const PatchSet    * 	patches	,
+                                                  const MaterialSet * 	matls	);
 
     void scheduleAdjustFailedDeformations_DamageErosionModels(		SchedulerP	&	sched	,
     													      const	PatchSet	*	patches	,
-														      const	MaterialSet	*	matls	);
+														      const	MaterialSet	*	matls	,
+															  const MPMFlags	*	flags	);
 
     // Used by the switcher
     virtual void setupForSwitching() {

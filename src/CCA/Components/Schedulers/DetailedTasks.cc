@@ -59,7 +59,7 @@ namespace Uintah {
   
   // used externally in DetailedTask.cc
   // for debugging - set the variable name (inside the quotes) and patchID to watch one in the scrubout
-  std::string g_var_scrub_dbg   = "";
+  std::string g_var_scrub_dbg   = "p.localizedMPM";
   int         g_patch_scrub_dbg = -1;
 }
 
@@ -311,7 +311,7 @@ DetailedTasks::makeDWKeyDatabase()
             const Patch* patch = patches->get(p);
             m_var_keyDB.insert(comp->m_var, matl, patch);
 
-            DOUT(g_detailed_dw_dbg, "reserve " << comp->m_var->getName() << " on Patch " << patch->getID() << ", Matl " << matl);
+            DOUT(g_detailed_dw_dbg, "\tTask " << task->getName() << "reserve " << comp->m_var->getName() << " on Patch " << patch->getID() << ", Matl " << matl);
           }
         }
       } //end matls

@@ -147,10 +147,11 @@ void MPMCommon::cohesiveZoneProblemSetup(const ProblemSpecP& prob_spec,
 }
 //______________________________________________________________________
 //
-void MPMCommon::scheduleUpdateStress_DamageErosionModels(SchedulerP   & sched,
-                                                     const PatchSet * patches,
-                                                     const MaterialSet * matls )
+void MPMCommon::scheduleUpdateStress_DamageErosionModels(SchedulerP   	& 	sched	,
+                                                     const PatchSet 	* 	patches	,
+                                                     const MaterialSet	* 	matls	)
 {
+
   printSchedule(patches,cout_doing,"MPMCommon::scheduleUpdateStress_DamageErosionModels");
   
   Task* t = scinew Task("MPM::updateStress_DamageErosionModels", this, 
@@ -174,8 +175,15 @@ void MPMCommon::scheduleUpdateStress_DamageErosionModels(SchedulerP   & sched,
 
 void MPMCommon::scheduleAdjustFailedDeformations_DamageErosionModels(		SchedulerP	&	sched	,
 															         const	PatchSet	*	patches	,
-																     const	MaterialSet	*	matls	)
+																     const	MaterialSet	*	matls	,
+																	 const  MPMFlags	*	flags   )
 {
+	  const Level* level = getLevel(patches);
+	  if (!flags->doMPMOnLevel(level->getIndex(), level->getGrid()->numLevels())){
+	    return;
+	  }
+
+
 	printSchedule(patches,cout_doing,"MPMCommon::scheduleAdjustFailedParticles_DamageErosionModels");
 
 	Task* t = scinew Task("MPMCommon::adjustFailedParticles_DamageErosionModels", this,
