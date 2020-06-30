@@ -58,15 +58,31 @@
                                                                           poisson'">
 
           <!-- mass_flow_rate -->
-          <!-- The mass_flow_rate utility computes the mass flowrate of inlet boundary conditions.
+          <!-- The mass_flow_rate utility computes the mass flowrate of inlet and outlet boundary conditions.
                To activate it, create a mass_flow_rate utility, then add "type=Inlet" to any mass flow
-               inlet for which you wish to have the flow rates. This will create reduction variables
+               inlet and "type=Outflow" for any outlet 
+               for which you wish to have the flow rates. This will create reduction variables
                for saving:
-               m_dot_g : Global total gas flow rate through all inlets
-               m_dot_p_organics : Global total particle organic flow rate (no ash or H2O) from all inlets
-               m_dot_g_* : Gas flow rate through inlet named * (wildcard)
-               m_dot_p_organics_ : Particle organics flow rate through inlet named * (wildcard)
-               See inputs/ARCHES/Coal/1GW_MFR.ups for an example of usage. -->
+               <task label>_mdot_g_in : Global total gas inflow rate 
+               <task label>_mdot_g_out : Global total gas outflow rate
+               <task label>_mdot_p_organics_in : Global total particle organic inflow rate (no ash or H2O) 
+               <task label>_mdot_p_organics_out : Global total particle organic outflow rate (no ash or H2O) 
+               <task label>_mdot_g_in_* : Gas flow rate through inlet named * (wildcard)
+               <task label>_mdot_g_out_* : Gas flow rate through outlet named * (wildcard)
+               <task label>_mdot_p_organics_in_ : Particle organics flow rate through inlet named * (wildcard)
+               <task label>_mdot_p_organics_out_ : Particle organics flow rate through outlet named * (wildcard)
+               Where the <task label> is the label the user assigns to the task (label=<task label>).
+               Note that one may add a scalar to the spec which will compute flowrates of the scalar (as 
+               opposed to the total flow rate) 
+               See inputs/ARCHES/Coal/1GW_MFR.ups for an example of usage.
+               For inlets/outlets through intrusions, you will need to compute those separately.
+               See inputs/ARCHES/intrusion_mass_balance.ups for an example of usage. This method introduces
+               a source term adjacent to the intrusion inlet where SRC = constant * rho * u. The source term is
+               found by saving out the <variable>_RHS term as shown in the example. Sum up <variable>_RHS over 
+               the intrusion inlet to obtain total flow rate. --> 
+
+          <scalar                       spec="OPTIONAL STRING" 
+                                        need_applies_to="type mass_flow_rate"/> <!-- Add a scalar to the mass flow rate calc. -->
 
           <!-- <grid type=...> represents the variable type. -->
           <grid                         spec="OPTIONAL NO_DATA"
@@ -668,7 +684,12 @@
 
           <LinearSwelling                 spec="OPTIONAL NO_DATA"
                                           need_applies_to="type coal">
-            <Fsw                          spec="OPTIONAL DOUBLE"/> <!-- swelling factor - default is 1.05 -->
+            <Fsw                          spec="OPTIONAL DOUBLE"/> <!-- swelling factor - default is 1.05.-->
+          <!--Assuming a constant devolatilization rate, and a linear swelling the analytical solution for this model is   -->
+          <!-- df = (Fsw+1)*di -->
+          <!-- Then, Fsw = 0 particle diameter is constant  -->
+          <!-- Fsw bigger than 0 will increase the diameter -->
+          <!-- Fsw lower than 0 will decrease the diameter -->
           </LinearSwelling>
 
           <SmithCharConstLv0                     spec="OPTIONAL NO_DATA"
@@ -992,6 +1013,23 @@
                                                                                        label= unique name for this intrusion boundary -->
            <geom_object/>                                                         <!-- geometry object associated with this intrusion -->
 
+           <!-- Some models will allow you to adjust the area that is used in the model calculation from the 
+                stair stepped area provided by the mesh (e.g. wall heat transfer). Use the area_model to specify 
+                the modification to the area. The modified area is computed as: 
+                  A_mod = A_face * factor 
+                where the factor can be computed one of two ways. A_mod would then be used in the physical model 
+                See just below for the details of each option. 
+                Note that domain edge boundary conditions are set in the <Grid><BoundaryCondition> section
+                using the Dirichlet option. -->
+           <area_model                  spec="OPTIONAL NO_DATA">
+            <!-- physical_area will compute the factor as:  
+                 factor = physical_area / wetted_stairstepped_geometry_area --> 
+            <physical_area              spec="OPTIONAL DOUBLE 'positive'"/>
+            <!-- alpha_g is simply a constant: 
+                 factor = alpha_g -->
+            <alpha_g                    spec="OPTIONAL DOUBLE 'positive'"/>
+           </area_model>
+
            <thin_wall                   spec="OPTIONAL NO_DATA"
                                         attribute1="delta REQUIRED DOUBLE"/>      <!-- [false] Look for thin walls between cells. If the
                                                                                        thin geometry cuts between, then make the cell a wall cell.
@@ -1078,7 +1116,7 @@
         </TurbulentInlet>
 
       <WallHT                           spec="OPTIONAL NO_DATA">
-        <relaxation_coef               spec="OPTIONAL DOUBLE 'positive'"/> <!-- relaxation to help with wildy varying wall temperatures
+         <relaxation_coef               spec="OPTIONAL DOUBLE 'positive'"/> <!-- relaxation to help with wildy varying wall temperatures
                                                                                    because we have assumed (with this model) that the wall comes to
                                                                                    instant equilibrium with the gas heat flux. Range 0 < relax < 1. Default = 1 no relaxation.
                                                                                    for wall with large thermal resistance, recommend relaxation_coef=0.1-0.8,
@@ -2021,31 +2059,26 @@
             <rxn_rate                   spec="REQUIRED STRING" need_applies_to="type tab_rxn_rate" />
 
              <!-- Spec for dTcorrectionFractor for the gas phase convection heat flux near the wall -->
-            <dTCorrectionFactor         spec="OPTIONAL STRING" need_applies_to="type ht_convection" />
+            <temperatureGradientModifier       spec="OPTIONAL STRING" need_applies_to="type ht_convection" /> <!-- A model constant that multiplies dt/dn, the gas-to-wall thermal gradient profile. Applied uniformly everywhere! -->
             <ConWallHT_src                     spec="REQUIRED NO_DATA"
-                                        attribute1="label REQUIRED STRING"
-                                        need_applies_to="type ht_convection"/> <!-- Convection SourceTerm for wall heat trasnfer -->
+                                               attribute1="label REQUIRED STRING"
+                                               need_applies_to="type ht_convection"/> <!-- Convection SourceTerm for wall heat trasnfer -->
 
-            <!-- Spec for constant and multi-point constant source term model -->
-            <constant                   spec="OPTIONAL DOUBLE" need_applies_to="type constant_src, fx_inject_src, fy_inject_src, fz_inject_src, cc_inject_src" />
+            <!-- Spec for constant source term model -->
+            <constant                   spec="OPTIONAL DOUBLE" need_applies_to="type constant_src" />
 
             <!-- Spec for using multiply by variable for constant source term model -->
-            <multiply_by_variable       spec="OPTIONAL NO_DATA" need_applies_to="type constant_src">
+            <multiply_by_variable         spec="OPTIONAL NO_DATA" need_applies_to="type constant_src">
               <variable_string_name       spec="REQUIRED STRING"/>
               <NewDW_only                 spec="OPTIONAL BOOLEAN"/>
             </multiply_by_variable>
 
             <!-- Spec for the char oxidation source -->
             <char_oxidation_model_name  spec="REQUIRED STRING" need_applies_to="type coal_gas_oxi" />
-            <char_src_label_for_nox    spec="OPTIONAL STRING" need_applies_to="type coal_gas_oxi"/>
+            <char_src_label_for_nox     spec="OPTIONAL STRING" need_applies_to="type coal_gas_oxi"/>
             <bd_char_src_label          spec="OPTIONAL STRING" need_applies_to="type coal_gas_oxi"/>
             <char_BirthDeath            spec="OPTIONAL NO_DATA" need_applies_to="type coal_gas_oxi">
             </char_BirthDeath>
-
-            <!-- Multi-point constant injection -->
-            <injector_region            spec="REQUIRED NO_DATA" need_applies_to="type fx_inject_src, fy_inject_src, fz_inject_src, cc_inject_src">
-              <geom_object/>
-            </injector_region>
 
             <!-- specs needed for second moment of mixture fraction source-->
             <scalar_dissipation_label   spec="REQUIRED STRING" need_applies_to="type moment2_mixture_fraction_src"/>
@@ -2057,11 +2090,13 @@
             <D                          spec="REQUIRED DOUBLE" need_applies_to="type dissipation_src"/> <!-- Molecular diffusivity (?) -->
             <turb_visc_label            spec="OPTIONAL STRING" need_applies_to="type dissipation_src"/> <!-- label for the turbulent viscosity. Default = turb_viscosity -->
 
-            <!-- inject_type = constant : constant value in every cell that is contained within the geom object (use <constant> spec)-->
-            <!-- inject_type = fromfile : reads an input file and assigns value at each i,j,k matching the inputfile
-                                          within the geom_oject (use <inputfile> spec)-->
-            <inject_type                spec="REQUIRED STRING 'constant, fromfile'" need_applies_to="type fx_inject_src, fy_inject_src, fz_inject_src, cc_inject_src" />
-            <inputfile                  spec="OPTIONAL STRING" need_applies_to="type fx_inject_src, fy_inject_src, fz_inject_src, cc_inject_src" />
+            <!-- Inject Sources: This is used in conjunction with the InteriorFace BC spec -->
+            <!--                 Set "Custom" in the InteriorFace var specification when using the "inputfile" (below) -->
+            <!--                 Set "Dirichlet" in the InteriorFace var specficiation and set the value spec (in the InteriorFace spec) to the constant desired -->
+            <!--                 Neumann isn't currently supported -->
+            <!--                 Note that the value specified in any case is rho*u*phi (flux). -->
+            <!--                 The code takes this value and multiplies by an area to compute the integral on a "face". -->  
+            <inputfile                  spec="OPTIONAL STRING" need_applies_to="type fx_inject_src, fy_inject_src, fz_inject_src, cc_inject_src"/>
 
             <!-- Radiation models -->
             <calc_frequency             spec="OPTIONAL INTEGER" need_applies_to="type do_radiation rmcrt_radiation" /> <!-- calculate radiation every N steps, default = 3 -->

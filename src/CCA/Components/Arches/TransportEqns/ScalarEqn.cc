@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright (c) 1997-2019 The University of Utah
+ * Copyright (c) 1997-2020 The University of Utah
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -590,9 +590,10 @@ ScalarEqn::buildTransportEqn( const ProcessorGroup* pc,
     if (d_doConv) {
       d_disc->computeConv( patch, Fconv, phi, uVel, vVel, wVel, den, areaFraction, d_convScheme );
       // look for and add contribution from intrusions.
-      if ( _using_new_intrusion ) {
-        _intrusions[ilvl]->addScalarRHS( patch, Dx, d_eqnName, RHS, den );
-      }
+    }
+    
+    if ( _using_new_intrusion ) {
+      _intrusions[ilvl]->addScalarRHS( patch, Dx, d_eqnName, RHS, den );
     }
 
     //----DIFFUSION

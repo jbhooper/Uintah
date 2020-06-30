@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright (c) 1997-2019 The University of Utah
+ * Copyright (c) 1997-2020 The University of Utah
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -439,7 +439,7 @@ ExplicitSolver::problemSetup( const ProblemSpecP & params,
   // the divQ and RMCRT acting as a radiometer) we need to look for it separately
   // here and put it into the src factory. This avoids a potential bug where
   // one radiation model may cancel out settings with the other. It also preserves how the code
-  // actually operates without a rewrite of the model.  
+  // actually operates without a rewrite of the model.
   ProblemSpecP db_radiometer = db->getRootNode()->findBlock("CFD")->findBlock("ARCHES")->findBlock("Radiometer");
   if ( db_radiometer != nullptr ){
     SourceTermFactory& src_factory = SourceTermFactory::self();
@@ -1275,6 +1275,9 @@ ExplicitSolver::sched_initialize( const LevelP& level,
 
   d_tabulated_properties->set_bcHelper( m_bcHelper[level->getIndex()] );
 
+  SourceTermFactory& srcFactory = SourceTermFactory::self();
+  srcFactory.set_bcHelper( m_bcHelper[level->getIndex()]); 
+
   if ( level->getIndex() == d_archesLevelIndex ){
 
     //formerly known as paramInit
@@ -1282,7 +1285,6 @@ ExplicitSolver::sched_initialize( const LevelP& level,
 
     // initialize hypre variables
     d_pressSolver->scheduleInitialize( level, sched, matls);
-
 
     //------------------ New Task Interface (start) ------------------------------------------------
 
@@ -1296,6 +1298,7 @@ ExplicitSolver::sched_initialize( const LevelP& level,
 
     i_trans_fac->second->set_bcHelper( m_bcHelper[level->getID()] );
     i_util_fac->second->set_bcHelper( m_bcHelper[level->getID()] );
+    i_property_models_fac->second->set_bcHelper( m_bcHelper[level->getID()] );
 
     const bool dont_pack_tasks = false;
     TaskFactoryBase::TaskMap all_tasks;
@@ -1805,6 +1808,9 @@ int ExplicitSolver::sched_nonlinearSolve(const LevelP& level,
     eqn->sched_initializeVariables(level, sched);
 
   }
+
+  //-------- carry forward the geometry modifier variable --------
+  d_boundaryCondition->sched_computeAlphaG( sched, level, matls, true );
 
   //copy the temperature into a radiation temperature variable:
   d_boundaryCondition->sched_create_radiation_temperature( sched, level, matls, false, true );

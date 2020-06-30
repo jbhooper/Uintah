@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright (c) 1997-2019 The University of Utah
+ * Copyright (c) 1997-2020 The University of Utah
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -189,8 +189,9 @@ using KokkosData = Kokkos::View<T***, Kokkos::LayoutLeft, Kokkos::MemoryTraits<K
         for(int j=0;j<s.y();j++){
           T* ddd=dd;
           T* sss=ss;
-          for(int k=0;k<s.x();k++)
+          for(int k=0;k<s.x();k++){
             ddd[k]=sss[k];
+          }
           dd+=d_size.x();
           ss+=from->d_size.x();
         }

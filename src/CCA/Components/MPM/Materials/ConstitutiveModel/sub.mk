@@ -1,7 +1,7 @@
 #
 #  The MIT License
 #
-#  Copyright (c) 1997-2019 The University of Utah
+#  Copyright (c) 1997-2020 The University of Utah
 #
 #  Permission is hereby granted, free of charge, to any person obtaining a copy
 #  of this software and associated documentation files (the "Software"), to
@@ -39,6 +39,7 @@ SRCS   += \
         $(SRCDIR)/CNH_MMS.cc                    \
         $(SRCDIR)/TransIsoHyper.cc              \
         $(SRCDIR)/TransIsoHyperImplicit.cc      \
+        $(SRCDIR)/TransIsoHypoFrictional.cc              \
         $(SRCDIR)/ViscoTransIsoHyper.cc         \
         $(SRCDIR)/ViscoTransIsoHyperImplicit.cc \
         $(SRCDIR)/ViscoScram.cc                 \

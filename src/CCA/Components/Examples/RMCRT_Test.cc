@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright (c) 1997-2019 The University of Utah
+ * Copyright (c) 1997-2020 The University of Utah
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -175,7 +175,7 @@ void RMCRT_Test::problemSetup(const ProblemSpecP& prob_spec,
       string type="nullptr";
       alg_ps->getAttribute("type", type);
 
-      if (type == "dataOnion" ) {
+      if (type == "dataOnion" ) {                   // Data Onion
         d_whichAlgo = dataOnion;
 
         //__________________________________
@@ -189,7 +189,7 @@ void RMCRT_Test::problemSetup(const ProblemSpecP& prob_spec,
         }
       } else if ( type == "RMCRT_coarseLevel" ) {   // 2 Level
         d_whichAlgo = coarseLevel;
-      } else if ( type == "singleLevel" ) {         // 1 LEVEL
+      } else if ( type == "singleLevel" ) {         // 1 Level
         d_whichAlgo = singleLevel;
       } else if ( type == "radiometerOnly" ) {      // Only when radiometer is used
         d_whichAlgo = radiometerOnly;

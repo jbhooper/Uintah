@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright (c) 1997-2019 The University of Utah
+ * Copyright (c) 1997-2020 The University of Utah
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -712,9 +712,10 @@ private:
                             ,       bool       replace
                             );
 
-  inline void checkModifyAccess(const VarLabel* label,
-                                int matlIndex,
-                                const Patch* patch);
+  inline void checkModifyAccess( const VarLabel * label
+                               ,       int        matlIndex
+                               , const Patch    * patch
+                               );
 
   // These will return false if access is not allowed for the current task.
   inline bool hasGetAccess( const Task            * runningTask

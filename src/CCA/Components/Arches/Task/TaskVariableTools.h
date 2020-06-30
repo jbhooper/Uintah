@@ -92,19 +92,17 @@ namespace Uintah {
       /** @brief Return a CONST grid variable **/
       template <typename T, typename... Args>
       typename std::enable_if<std::is_base_of<Uintah::constVariableBase<Uintah::GridVariableBase>, T>::value, T&>::type
-      get_field( const std::string name, Args... args ){
-
+      get_field( const std::string name, Args... args )
+      {
         return *( _field_container->get_const_field<T>(name, args...) );
-
       }
 
       /** @brief Return a NON-CONST grid variable **/
       template <typename T, typename... Args>
       typename std::enable_if<!std::is_base_of<Uintah::constVariableBase<Uintah::GridVariableBase>, T>::value, T&>::type
-      get_field( const std::string name, Args... args ){
-
+      get_field( const std::string name, Args... args )
+      {
         return  *(_field_container->get_field<T>(name, args...));
-
       }
 
       /** @brief Return a UINTAH particle field **/
@@ -132,10 +130,10 @@ namespace Uintah {
 
     private:
 
-      ArchesFieldContainer* _field_container;
+      ArchesFieldContainer* _field_container{nullptr};
 
             std::vector<ArchesFieldContainer::VariableInformation>   _var_reg;
-      const Patch                                                  * _patch;
+      const Patch                                                  * _patch{nullptr};
             SchedToTaskInfo                                        & _tsk_info;
 
   }; // ArchesTaskInfoManager
@@ -190,7 +188,7 @@ namespace Uintah {
                         , const bool        temporary_variable = false
                         );
 
-  /** @brief Helper struct when resolving get_uintah_field and get_const_uintah_field becomes tricky **/
+  /** @brief Helper struct when resolving get_field becomes tricky **/
   template <typename T>
   struct FieldTool
   {

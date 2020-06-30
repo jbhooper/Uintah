@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright (c) 1997-2019 The University of Utah
+ * Copyright (c) 1997-2020 The University of Utah
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -1188,6 +1188,7 @@ SchedulerCommon::advanceDataWarehouse( const GridP & grid
 
   ASSERT(m_dws.size() >= 2);
 
+  // TODO: This can cost roughly 1 millisecond of time.  Find a way to reuse data warehouses if possible?  Brad March 6 2018
   // The last becomes last old, and the rest are new
   m_dws[m_num_old_dws - 1] = m_dws[m_dws.size() - 1];
 

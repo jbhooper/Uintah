@@ -4,7 +4,7 @@
 /*
  * The MIT License
  *
- * Copyright (c) 1997-2019 The University of Utah
+ * Copyright (c) 1997-2020 The University of Utah
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
@@ -346,30 +346,30 @@ private:
 //--------------------------------------------------------------------------------------------------
   template <typename T > void
   TimeAve<T >::compute_bcs( const Patch* patch, ArchesTaskInfoManager* tsk_info ){
-  const BndMapT& bc_info = m_bcHelper->get_boundary_information();
-  ArchesCore::VariableHelper<T> helper;
-  typedef typename ArchesCore::VariableHelper<T>::ConstType CT;
-  constCCVariable<double>& vol_fraction = tsk_info->get_field<constCCVariable<double> >(m_volFraction_name);
 
+    const BndMapT& bc_info = m_bcHelper->get_boundary_information();
+    ArchesCore::VariableHelper<T> helper;
+    typedef typename ArchesCore::VariableHelper<T>::ConstType CT;
+    constCCVariable<double>& vol_fraction = tsk_info->get_field<constCCVariable<double> >(m_volFraction_name);
 
-  for ( auto ieqn = m_scaling_info.begin(); ieqn != m_scaling_info.end(); ieqn++ ){
-    CT& phi = tsk_info->get_field<CT>(ieqn->first);
-    T& phi_unscaled = tsk_info->get_field<T>((ieqn->second).unscaled_var);
+    for ( auto ieqn = m_scaling_info.begin(); ieqn != m_scaling_info.end(); ieqn++ ){
+      CT& phi = tsk_info->get_field<CT>(ieqn->first);
+      T& phi_unscaled = tsk_info->get_field<T>((ieqn->second).unscaled_var);
 
-    for ( auto i_bc = bc_info.begin(); i_bc != bc_info.end(); i_bc++ ){
-      const bool on_this_patch = i_bc->second.has_patch(patch->getID());
-      //Get the iterator
+      for ( auto i_bc = bc_info.begin(); i_bc != bc_info.end(); i_bc++ ){
+        const bool on_this_patch = i_bc->second.has_patch(patch->getID());
+        //Get the iterator
 
-      if ( on_this_patch ){
-        Uintah::Iterator cell_iter = m_bcHelper->get_uintah_extra_bnd_mask( i_bc->second, patch->getID());
+        if ( on_this_patch ){
+          Uintah::Iterator cell_iter = m_bcHelper->get_uintah_extra_bnd_mask( i_bc->second, patch->getID());
 
           for ( cell_iter.reset(); !cell_iter.done(); cell_iter++ ){
             IntVector c = *cell_iter;
             phi_unscaled[c] = phi[c] * (ieqn->second).constant*vol_fraction[c] ;
           }
         }
+      }
     }
-  }
   }
 }
 #endif

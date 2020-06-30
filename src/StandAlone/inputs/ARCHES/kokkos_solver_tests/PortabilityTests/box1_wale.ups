@@ -61,6 +61,9 @@
     <save label="w_qn1_x_flux"/>
     <save label="w_qn1_y_flux"/>
     <save label="w_qn1_z_flux"/>
+    <save label="w_qn0_x_flux"/>
+    <save label="w_qn0_y_flux"/>
+    <save label="w_qn0_z_flux"/>
     <save label="face_pvel_x_0"/>
     <save label="face_pvel_y_0"/>
     <save label="face_pvel_z_0"/>
@@ -99,13 +102,13 @@
           <value>1</value>
         </BCType>
         <BCType var="Dirichlet" label="w_qn1">
-          <value>1</value>
+          <value>.5</value>
         </BCType>
         <BCType var="Dirichlet" label="length_qn0">
-          <value>0</value>
+          <value>1</value>
         </BCType>
         <BCType var="Dirichlet" label="length_qn1">
-          <value>0</value>
+          <value>2</value>
         </BCType>
         <BCType var="Dirichlet" label="pU_qn0">
           <value>0</value>
@@ -120,10 +123,10 @@
           <value>0</value>
         </BCType>
         <BCType var="Dirichlet" label="pW_qn0">
-          <value>.0</value>
+          <value>1.</value>
         </BCType>
         <BCType var="Dirichlet" label="pW_qn1">
-          <value>1</value>
+          <value>.5</value>
         </BCType>
       </Face>
       <Face side = "z+" type="Outflow" >
@@ -480,7 +483,7 @@
           <diffusion_coef label="gamma"/>
           <eqn label="phi">
             <convection scheme="superbee"/>
-            <!--<diffusion scheme ="central"/>-->
+            <diffusion scheme ="central"/>
 	          <clip low="0" high="1"/>
           </eqn>
         </eqn_group>
