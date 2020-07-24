@@ -92,6 +92,9 @@ static DebugStream cout_convert("MPMConv", false);
 static DebugStream cout_heat("MPMHeat", false);
 static DebugStream amr_doing("AMRMPM", false);
 
+#undef CBDI_FLUXBCS
+#define USE_FLUX_RESTRICTION
+
 static Vector face_norm(Patch::FaceType f)
 {
   switch(f) {
@@ -109,17 +112,20 @@ SerialMPM::SerialMPM( const ProcessorGroup* myworld,
                       const MaterialManagerP materialManager) :
   MPMCommon( myworld, materialManager )
 {
+  d_one_matl = nullptr;  // Get my IDE to quit bitching about this not being defined.
+
   flags = scinew MPMFlags(myworld);
 
   d_nextOutputTime=0.;
   d_SMALL_NUM_MPM=1e-200;
-  contactModel        = 0;
-  thermalContactModel = 0;
-  heatConductionModel = 0;
+  contactModel        = nullptr;
+  thermalContactModel = nullptr;
+  heatConductionModel = nullptr;
   NGP     = 1;
   NGN     = 1;
   d_loadCurveIndex=0;
-  d_switchCriteria = 0;
+
+  d_switchCriteria = nullptr;
 
   d_fracture = false;
 
@@ -135,6 +141,7 @@ SerialMPM::~SerialMPM()
   delete thermalContactModel;
   delete heatConductionModel;
 
+  // Scalar Diffusion related
   delete d_fluxBC;
   if (flags->d_doScalarDiffusion) {
     delete d_sdInterfaceModel;
@@ -685,9 +692,9 @@ SerialMPM::scheduleTimeAdvance(const LevelP & level,
 
   scheduleComputeCurrentParticleSize(     sched, patches, matls);
   scheduleApplyExternalLoads(             sched, patches, matls);
-  if(flags->d_doScalarDiffusion) {
+//  if(flags->d_doScalarDiffusion) {  JBH 7.2020 -- Lets try removing this
     d_fluxBC->scheduleApplyExternalScalarFlux(sched, patches, matls);
-  }
+//  }
   scheduleInterpolateParticlesToGrid(     sched, patches, matls);
   if(flags->d_computeNormals){
     scheduleComputeNormals(               sched, patches, matls);
@@ -3219,7 +3226,7 @@ void SerialMPM::computeAndIntegrateDiffusion(const  ProcessorGroup  *
         IntVector node = *iter;
 //        gConcRate[node] /= mass[node];
         gConcStar[node]  = gConcentration[node] +
-                            (gConcRate[node]/mass[node] + gSD_IF_FluxRate[node]);
+                            (gConcRate[node]/mass[node] + gSD_IF_FluxRate[node]) * delT;
       }
       MPMBoundCond bc;
       bc.setBoundaryCondition(patch, dwi, "SD-Type", gConcStar,
@@ -4039,6 +4046,15 @@ void SerialMPM::interpolateToParticlesAndUpdate(const ProcessorGroup*,
           totalmass  += pmass[idx];
         }
       } // use XPIC(2) or not
+
+      if (flags->d_doAutoCycleBC && flags->d_doScalarDiffusion) {
+    	  if (flags->d_autoCycleUseMinMax) {
+    		  new_dw->put(max_vartype(maxPatchConc), lb->diffusion->rMaxConcentration);
+    		  new_dw->put(min_vartype(minPatchConc), lb->diffusion->rMinConcentration);
+    	  } else {
+    		  new_dw->put(sum_vartype(totalConc), 	 lb->diffusion->rTotalConcentration);
+    	  }
+      }
 
       // scale back huge particle velocities.
       // Default for d_max_vel is 3.e105, hence the conditional

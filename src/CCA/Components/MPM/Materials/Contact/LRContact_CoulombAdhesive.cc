@@ -118,7 +118,6 @@ void LRContact_CoulombAdhesive::exMomInterpolated(const ProcessorGroup	*			,
 	 double cellVolume = dx.x()*dx.y()*dx.z();
 	 double invCellVolume = 1.0/cellVolume;
 
-
      constNCVariable<double> NC_CCweight;
      constNCVariable<int> alphaMaterial;
      constNCVariable<Vector> normAlphaToBeta;
@@ -136,14 +135,16 @@ void LRContact_CoulombAdhesive::exMomInterpolated(const ProcessorGroup	*			,
        new_dw->get(gmass[m],          lb->gMassLabel,     			dwi, patch, gnone, 0);
        new_dw->get(gvolume[m],        lb->gVolumeLabel,   			dwi, patch, gnone, 0);
        new_dw->get(gmatlprominence[m],lb->gMatlProminenceLabel,		dwi, patch, gnone, 0);
+
        new_dw->getModifiable(gvelocity[m],   lb->gVelocityLabel,	dwi, patch );
      } // Load material arrays.
 
-     const Vector projDummy(1.0, 1.0, 1.0);  // Dummy vector to decompose normals and tangents.
+     const Vector projDummy(Vector(1.0, 1.0, 1.0).safe_normalize(1e-50));  // Dummy vector to decompose normals and tangents.
+
      for(NodeIterator iter = patch->getNodeIterator(); !iter.done(); ++iter)  {
        IntVector nodeIndex = *iter;
        int alpha = alphaMaterial[nodeIndex];
-       if( alpha >= 0 )  {  // Only work on nodes where alpha!=-99 (i.e. multipler materials)
+       if( alpha >= 0 )  {  // Only work on nodes where alpha!=-99 (i.e. multiple materials)
 
     	 // Calculate nodal volume for axisymmetric problems
       	 if(flag->d_axisymmetric)	{  // Nodal volume isn't constant for axisymmetry

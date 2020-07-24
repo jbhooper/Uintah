@@ -207,7 +207,7 @@ ErosionModel::addComputesAndRequires_deformation(		Task		* 	task	,
 		return;
 	}
 
-	printTask( dbg, "  ErosionModel::addCOmputesAndRequires_deformation");
+	printTask( dbg, "  ErosionModel::addComputesAndRequires_deformation");
 
 	Ghost::GhostType gnone = Ghost::None;
 	const MaterialSubset* matls = matl->thisMaterial();
