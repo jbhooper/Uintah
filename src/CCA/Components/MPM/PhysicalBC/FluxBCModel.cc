@@ -101,9 +101,8 @@ void FluxBCModel::initializeScalarFluxBC(const ProcessorGroup*, const PatchSubse
                                          const MaterialSubset*, DataWarehouse* old_dw,
                                          DataWarehouse* new_dw)
 {
-  std::cout << "doing Initialize flux bc" << std::endl;
   double time = 0.0;
-  printTask(patches,patches->get(0),cout_doing,"Doing initialize ScalarFluxBC");
+  printTask(patches,patches->get(0),cout_doing,"Doing initialize FluxBCModel::initializeScalarFluxBC");
   if (cout_doing.active())
     cout_doing << "Current Time (Initialize ScalarFlux BC) = " << time << std::endl;
 
@@ -297,11 +296,11 @@ void FluxBCModel::countMaterialPointsPerFluxLoadCurve(const ProcessorGroup*,
   printTask(patches, patches->get(0), cout_doing,
                        "countMaterialPointsPerLoadCurve");
   // Find the number of pressure BCs in the problem
-  int nofSFBCs = 0;
+  int number_scalar_flux_BCs = 0;
   for (int ii = 0; ii<(int)MPMPhysicalBCFactory::mpmPhysicalBCs.size(); ii++){
     std::string bcs_type = MPMPhysicalBCFactory::mpmPhysicalBCs[ii]->getType();
     if (bcs_type == "ScalarFlux") {
-      nofSFBCs++;
+      number_scalar_flux_BCs++;
 
       // Loop through the patches and count
       for(int p=0;p<patches->size();p++){
@@ -320,14 +319,14 @@ void FluxBCModel::countMaterialPointsPerFluxLoadCurve(const ProcessorGroup*,
           for(;iter != pset->end(); iter++){
             particleIndex idx = *iter;
             for(int k = 0;k<3;k++){
-              if (pLoadCurveID[idx](k) == (nofSFBCs)){
+              if (pLoadCurveID[idx](k) == (number_scalar_flux_BCs)){
                 ++numPts;
               }
             }
           }
         } // matl loop
         new_dw->put(sumlong_vartype(numPts),
-                    d_mpm_lb->materialPointsPerLoadCurveLabel, 0, nofSFBCs-1);
+                    d_mpm_lb->materialPointsPerLoadCurveLabel, 0, number_scalar_flux_BCs-1);
       }  // patch loop
     }
   }

@@ -448,8 +448,16 @@ MPMFlags::outputProblemSpec(ProblemSpecP& ps)
   ps->appendElement("restartOnLargeNodalVelocity",d_restartOnLargeNodalVelocity);
   ps->appendElement("extra_solver_flushes", d_extraSolverFlushes);
   ps->appendElement("boundary_traction_faces", d_bndy_face_txt_list);
-  ps->appendElement("do_scalar_diffusion", d_doScalarDiffusion);
   ps->appendElement("d_ndim",                      d_ndim);
+
+  // Scalar diffusion related:
+  ps->appendElement("do_scalar_diffusion", d_doScalarDiffusion);
+  ps->appendElement("do_auto_cycle_bc", d_doAutoCycleBC);
+  ps->appendElement("auto_cycle_use_minmax", d_autoCycleUseMinMax);
+  ps->appendElement("auto_cycle_max", d_autoCycleMax);
+  ps->appendElement("auto_cycle_min", d_autoCycleMin);
+  ps->appendElement("with_gauss_solver", d_withGaussSolver);
+
 }
 
 bool

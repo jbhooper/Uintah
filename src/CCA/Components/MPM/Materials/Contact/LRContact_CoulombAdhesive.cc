@@ -146,20 +146,13 @@ void LRContact_CoulombAdhesive::exMomInterpolated(const ProcessorGroup	*			,
        int alpha = alphaMaterial[nodeIndex];
        if( alpha >= 0 )  {  // Only work on nodes where alpha!=-99 (i.e. multiple materials)
 
-    	 // Calculate nodal volume for axisymmetric problems
-      	 if(flag->d_axisymmetric)	{  // Nodal volume isn't constant for axisymmetry
-      	   // volume = r*dr*dtheta*dy  (dtheta = 1 radian)
-      	   double r = min((patch->getNodePosition(nodeIndex)).x(),.5*dx.x());
-      	   cellVolume =  r*dx.x()*dx.y();
-     	 }
-
       	 double nodalWeighting = 8.0 * NC_CCweight[nodeIndex];
     	 // Calculate nodal CoM quantities
       	 Vector p_CoM(0.0, 0.0, 0.0); // center of mass momentum
       	 double m_CoM=0.0;            // nodal mass for center of mass calcs
       	 double nodalVolume = 0.0;    // total nodal volume
       	 for (int matlIndex = 0; matlIndex < numMatls; ++matlIndex) {
-           if (d_matls.requested(matlIndex)) {
+           if (d_matls.requested(matlIndex)) {  // Include velocities only for materials undergoing contact
       		 p_CoM += gvelocity[matlIndex][nodeIndex] * gmass[matlIndex][nodeIndex];
       		 m_CoM += gmass[matlIndex][nodeIndex];
       		 nodalVolume += gvolume[matlIndex][nodeIndex] * nodalWeighting;
@@ -167,6 +160,13 @@ void LRContact_CoulombAdhesive::exMomInterpolated(const ProcessorGroup	*			,
       	 } // Iterate over materials
 
       	 Vector v_CoM = p_CoM/m_CoM;
+
+    	 // Calculate nodal volume for axisymmetric problems
+      	 if(flag->d_axisymmetric)	{  // Nodal volume isn't constant for axisymmetry
+      	   // volume = r*dr*dtheta*dy  (dtheta = 1 radian)
+      	   double r = min((patch->getNodePosition(nodeIndex)).x(),.5*dx.x());
+      	   cellVolume =  r*dx.x()*dx.y();
+     	 }
 
       	 // Only apply contact if the node is full relative to a constraint
       	 if ( (nodalVolume*invCellVolume) > d_vol_const) {
@@ -176,6 +176,7 @@ void LRContact_CoulombAdhesive::exMomInterpolated(const ProcessorGroup	*			,
       	   double alphaMass = gmass[alpha][nodeIndex];
       	   //alphaNormal.safe_normalize();  // Ensure the alpha normal is unit
 
+      	   // This may be un-necessary FIXME JBH TODO 8.2020
       	   // Determine the perpendicular distance metric only if grid is not uniform.
       	   if (!equalGrid) { // Need to account for non-uniform grid spacings.
           	 Vector alphaTangent = (projDummy - Dot(projDummy,alphaNormal)*alphaNormal);
@@ -187,12 +188,15 @@ void LRContact_CoulombAdhesive::exMomInterpolated(const ProcessorGroup	*			,
       		 hPerp = cellVolume * sqrt(Dot(a,a)*Dot(b,b));
       	   } // Grid is equal in all directions
 
+      	   // Separation < 0 materials in contact.
+      	   // Separation == 0 materials in contact if velocities toward other material
+      	   // 0 < Separation < adhesiveThickness * hPerp:  Material in adhesive range
       	   double separationOffset = d_adhesiveThickness*hPerp;
 
 
       	   // Material normal and alpha normal are in opposite directions
       	   // Tangents are in the same direction.
-      	   Vector matlNormal = -alphaNormal; // matlNormal = -normAlphaToBeta[nodeIndex]
+      	   Vector betaLumpedNormal = -alphaNormal; // betaLumpedNormal = -normAlphaToBeta[nodeIndex]
       	   for (int matlIndex = 0; matlIndex < numMatls; ++matlIndex) {
       		 double matlMass = gmass[matlIndex][nodeIndex];
       		 Vector p_matl = gvelocity[matlIndex][nodeIndex]*matlMass;
@@ -214,11 +218,11 @@ void LRContact_CoulombAdhesive::exMomInterpolated(const ProcessorGroup	*			,
 	      	   Vector p_correct(0.0, 0.0, 0.0);
 			   if (contact or nearContact) { // Close enough to care about contact calculations
 	      	     Vector delta_p = matlMass * v_CoM - p_matl; // m * (v_CoM - v) = m * (-deltaVelocity)
-	      	     double N_Ac_dt = -Dot(delta_p, matlNormal); // -(n1*(P1CoM-p1M)+n2*(P2CoM-p2M)+n3*(P3CoM-p3M))
+	      	     double N_Ac_dt = -Dot(delta_p, betaLumpedNormal); // -(n1*(P1CoM-p1M)+n2*(P2CoM-p2M)+n3*(P3CoM-p3M))
 
-	      	     Vector matlTangent = delta_p + N_Ac_dt*matlNormal;
+	      	     Vector matlTangent = delta_p + N_Ac_dt*betaLumpedNormal;
 	      	     double S_stick_Ac_dt = matlTangent.safe_normalize(1.0e-20);
-	      	     Vector normalCorrect = -N_Ac_dt * matlNormal;
+	      	     Vector normalCorrect = -N_Ac_dt * betaLumpedNormal;
 	      	     if (contact) { // Surfaces already in contact or trying to penetrate one another
 	      	       double S_adhere_Ac_dt = d_shearAdhesion * contactArea * delT;
 	      	       if (N_Ac_dt > 0.0) { // Surfaces in compression

@@ -42,6 +42,7 @@ using namespace std;
 ScalarFluxBC::ScalarFluxBC(ProblemSpecP& ps, const GridP& grid,
                        const MPMFlags* flags)
 {
+  d_outwardNormal = Vector(0.0, 0.0, 0.0);
   // First read the geometry information
   // d_surface is the geometry object containing the surface to be loaded.
 #if 0
@@ -58,7 +59,6 @@ ScalarFluxBC::ScalarFluxBC(ProblemSpecP& ps, const GridP& grid,
   ProblemSpecP adult = ps->findBlock("geom_object");
   ProblemSpecP child = adult->findBlock();
   std::string go_type = child->getNodeName();
-  //std::cerr << "ScalarFluxBC::go_type = " << go_type << endl;
   if (go_type == "box") {
     d_surface = scinew BoxGeometryPiece(child);
     //Box box = d_surface->getBoundingBox();

@@ -34,11 +34,13 @@ using namespace Uintah;
 
 FluxBCModel* FluxBCModelFactory::create(MaterialManagerP& ss, MPMFlags* flags)
 {
-  if (flags->d_doAutoCycleBC)
-    return(scinew AutoCycleFluxBC(ss, flags));
-
-  else
+  if (flags->d_doAutoCycleBC) {
+	  std::cerr << "Instantiating autocycle flux BC." << std::endl;
+	  return(scinew AutoCycleFluxBC(ss, flags));
+  } else {
+	  std::cerr << "Instantiating regular flux BC." << std::endl;
     return(scinew FluxBCModel(ss, flags));
+  }
 
   return 0;
 }

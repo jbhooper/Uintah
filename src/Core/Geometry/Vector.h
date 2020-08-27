@@ -120,6 +120,7 @@ public:
   inline double normalize();
   inline double safe_normalize(double epsilon = 1.0e-12);
   Vector normal() const;
+  Vector safe_normal(double epsilon = 1.0e-12) const;
   friend inline Vector Cross(const Vector&, const Vector&);
   friend inline Vector Abs(const Vector&);
   inline void x(double);

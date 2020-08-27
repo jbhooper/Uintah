@@ -165,7 +165,7 @@ WARNING
                                    CCVariable<double>& vfCC,
                                    const Patch* patch);
 
-   bool doConcReduction(){ return d_do_conc_reduction; };
+   bool doConcReduction() const { return d_do_conc_reduction; };
 
  private:
 

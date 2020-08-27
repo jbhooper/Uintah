@@ -63,14 +63,14 @@ void AutoCycleFluxBC::scheduleInitializeScalarFluxBCs(const LevelP& level, Sched
   d_load_curve_index->add(0);
   d_load_curve_index->addReference();
 
-  int nofSFBCs = 0;
+  int number_scalar_flux_BCs = 0;
   for (int ii = 0; ii<(int)MPMPhysicalBCFactory::mpmPhysicalBCs.size(); ii++){
     std::string bcs_type = MPMPhysicalBCFactory::mpmPhysicalBCs[ii]->getType();
     if (bcs_type == "ScalarFlux"){
-      d_load_curve_index->add(nofSFBCs++);
+      d_load_curve_index->add(number_scalar_flux_BCs++);
     }
   }
-  if (nofSFBCs > 0) {
+  if (number_scalar_flux_BCs > 0) {
     printSchedule(patches,cout_doing,"AutoCycleFluxBC::countMaterialPointsPerFluxLoadCurve");
     printSchedule(patches,cout_doing,"AutoCycleFluxBC::scheduleInitializeScalarFluxBCs");
     // Create a task that calculates the total number of particles
@@ -96,35 +96,38 @@ void AutoCycleFluxBC::scheduleInitializeScalarFluxBCs(const LevelP& level, Sched
       delete d_load_curve_index;
 }
 
-void AutoCycleFluxBC::initializeScalarFluxBC(const ProcessorGroup*, const PatchSubset* patches,
-                                         const MaterialSubset*, DataWarehouse* old_dw,
-                                         DataWarehouse* new_dw)
+void AutoCycleFluxBC::initializeScalarFluxBC(	const 	ProcessorGroup	*
+											, 	const 	PatchSubset		* patches
+											,	const 	MaterialSubset	*
+											, 			DataWarehouse	* old_dw
+											,			DataWarehouse	* new_dw
+											)
 {
-  double time = 0.0;
-  printTask(patches,patches->get(0),cout_doing,"Doing initialize ScalarFluxBC");
-  if (cout_doing.active())
-    cout_doing << "Current Time (Initialize ScalarFlux BC) = " << time << std::endl;
+	double time = 0.0;
+	printTask(patches,patches->get(0),cout_doing,"Doing AutoCycleFluxBC::initializeScalarFluxBC");
+	if (cout_doing.active())
+		cout_doing << "Current Time (Initialize AutoCycling ScalarFlux BC) = " << time << std::endl;
 
-  // Calculate the scalar flux at each particle
-  for(int p=0;p<patches->size();p++){
-    int numMPMMatls=d_materialManager->getNumMatls( "MPM" );
-    for(int m = 0; m < numMPMMatls; m++){
-      int nofSFBCs = 0;
-      for(int ii = 0; ii<(int)MPMPhysicalBCFactory::mpmPhysicalBCs.size();ii++){
-        std::string bcs_type = MPMPhysicalBCFactory::mpmPhysicalBCs[ii]->getType();
-        if (bcs_type == "ScalarFlux") {
+	// Calculate the scalar flux at each particle
+	for(int patchIndex = 0; patchIndex < patches->size(); ++patchIndex)	{
+		int numMPMMatls=d_materialManager->getNumMatls( "MPM" );
+		for(int matlIndex = 0; matlIndex < numMPMMatls; ++matlIndex)	{
+			int number_autocycle_flux_BCs = 0;
+			for(int ii = 0; ii<(int)MPMPhysicalBCFactory::mpmPhysicalBCs.size();ii++)	{
+				std::string bcs_type = MPMPhysicalBCFactory::mpmPhysicalBCs[ii]->getType();
+				if (bcs_type == "ScalarFlux") {
 
-          // Get the material points per load curve
-          sumlong_vartype numPart = 0;
-          new_dw->get(numPart,d_mpm_lb->materialPointsPerLoadCurveLabel,0,nofSFBCs++);
+					// Get the material points per load curve
+					sumlong_vartype numberBCParticles = 0;
+					new_dw->get(numberBCParticles,	d_mpm_lb->materialPointsPerLoadCurveLabel,	0,	number_autocycle_flux_BCs++);
 
-          // Save the material points per load curve in the ScalarFluxBC object
-          ScalarFluxBC* pbc = dynamic_cast<ScalarFluxBC*>(MPMPhysicalBCFactory::mpmPhysicalBCs[ii]);
-          pbc->numMaterialPoints(numPart);
+					// Save the material points per load curve in the ScalarFluxBC object
+					ScalarFluxBC* autoFluxBC = dynamic_cast<ScalarFluxBC*>(MPMPhysicalBCFactory::mpmPhysicalBCs[ii]);
+					autoFluxBC->numMaterialPoints(numberBCParticles);
 
           if (cout_doing.active()){
             cout_doing << "    Load Curve = "
-                       << nofSFBCs << " Num Particles = " << numPart << std::endl;
+                       << number_autocycle_flux_BCs << " Num Particles = " << numPart << std::endl;
           }
         }   // if pressure loop
       }    // loop over all Physical BCs
@@ -216,6 +219,13 @@ void AutoCycleFluxBC::applyExternalScalarFlux(const ProcessorGroup* , const Patc
   if(d_mpm_flags->d_autoCycleUseMinMax){
     old_dw->get(maxconc, d_mpm_lb->diffusion->rMaxConcentration);
     old_dw->get(minconc, d_mpm_lb->diffusion->rMinConcentration);
+//  FIXME TODO Remove comments after debug complete JBH 8/2020
+//		std::cerr << "d_autoCycleUseMinMax: " << d_mpm_flags->d_autoCycleUseMinMax << std::endl;
+//      std::cerr << "Max Conc: " << maxconc << std::endl;
+//      std::cerr << "d_auto_cycle_max: " << d_auto_cycle_max << std::endl;
+//      std::cerr << "Min Conc: " << minconc << std::endl;
+//      std::cerr << "d_auto_cycle_min: " << d_auto_cycle_min << std::endl;
+//      std::cerr << "d_flux_sign: " << d_flux_sign << std::endl;
     if(d_flux_sign > 0){
       if(minconc > d_auto_cycle_max && minconc < 4e11){
         d_flux_sign = -1.0;
@@ -260,7 +270,7 @@ void AutoCycleFluxBC::applyExternalScalarFlux(const ProcessorGroup* , const Patc
       constParticleVariable<Vector>  parea;
       constParticleVariable<double>  pvol;
       ParticleVariable<double> pExternalScalarFlux;
-      ParticleVariable<double> pExternalScalarFlux_pR;
+      //ParticleVariable<double> pExternalScalarFlux_pR;
       ParticleVariable<double> pAvgConc;
 
       old_dw->get(px,    d_mpm_lb->pXLabel,    pset);
@@ -341,17 +351,17 @@ void AutoCycleFluxBC::countMaterialPointsPerFluxLoadCurve(const ProcessorGroup*,
   printTask(patches, patches->get(0), cout_doing,
                        "countMaterialPointsPerLoadCurve");
   // Find the number of pressure BCs in the problem
-  int nofSFBCs = 0;
+  int numAutoCycleFluxBC = 0;
   for (int ii = 0; ii<(int)MPMPhysicalBCFactory::mpmPhysicalBCs.size(); ii++){
     std::string bcs_type = MPMPhysicalBCFactory::mpmPhysicalBCs[ii]->getType();
     if (bcs_type == "ScalarFlux") {
-      nofSFBCs++;
+    	++numAutoCycleFluxBC;
 
       // Loop through the patches and count
       for(int p=0;p<patches->size();p++){
         const Patch* patch = patches->get(p);
         int numMPMMatls=d_materialManager->getNumMatls( "MPM" );
-        int numPts = 0;
+        int numPointsWithFlux = 0;
         for(int m = 0; m < numMPMMatls; m++){
           MPMMaterial* mpm_matl = (MPMMaterial*) d_materialManager->getMaterial( "MPM",  m );
           int dwi = mpm_matl->getDWIndex();
@@ -364,14 +374,14 @@ void AutoCycleFluxBC::countMaterialPointsPerFluxLoadCurve(const ProcessorGroup*,
           for(;iter != pset->end(); iter++){
             particleIndex idx = *iter;
             for(int k = 0;k<3;k++){
-              if (pLoadCurveID[idx](k) == (nofSFBCs)){
-                 ++numPts;
+              if (pLoadCurveID[idx](k) == (numAutoCycleFluxBC)){
+                 ++numPointsWithFlux;
               }
             }
           }
         } // matl loop
-        new_dw->put(sumlong_vartype(numPts),
-                    d_mpm_lb->materialPointsPerLoadCurveLabel, 0, nofSFBCs-1);
+        new_dw->put(sumlong_vartype(numPointsWithFlux),
+                    d_mpm_lb->materialPointsPerLoadCurveLabel, 0, numAutoCycleFluxBC-1);
       }  // patch loop
     }
   }

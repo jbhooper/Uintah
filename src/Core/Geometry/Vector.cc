@@ -128,6 +128,14 @@ Vector::normal() const
    return v;                    // 
 }
 
+Vector
+Vector::safe_normal(double epsilon) const
+{
+	Vector v(*this);
+	v.safe_normalize(epsilon);
+	return v;
+}
+
 ostream& operator<<( ostream& os, const Vector& v )
 {
   os << ' ' << v.x() << ' ' << v.y() << ' ' << v.z() << ' ';

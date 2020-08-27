@@ -703,7 +703,7 @@ SerialMPM::scheduleTimeAdvance(const LevelP & level,
     scheduleFindSurfaceParticles(         sched, patches, matls);
     scheduleComputeLogisticRegression(    sched, patches, matls);
   }
-  scheduleExMomInterpolated(              sched, patches, matls);
+  scheduleExMomInterpolated(              sched, patches, matls);  // Contact here
   if(flags->d_doScalarDiffusion) {
     scheduleConcInterpolated(             sched, patches, matls);
   }
@@ -3782,6 +3782,7 @@ void SerialMPM::interpolateToParticlesAndUpdate(const ProcessorGroup*,
 
     for(unsigned int m = 0; m < numMPMMatls; m++){
       MPMMaterial* mpm_matl = (MPMMaterial*) m_materialManager->getMaterial( "MPM",  m );
+// FIXME TODO Remove comment once debugged JBH  	  std::cerr << "Material: " << mpm_matl->getName()<< " doConcReduction:" << mpm_matl->doConcReduction() << std::endl;
       int dwi = mpm_matl->getDWIndex();
       // Get the arrays of particle values to be changed
       constParticleVariable<Point> px;
@@ -5812,23 +5813,45 @@ void SerialMPM::computeLogisticRegression(const ProcessorGroup *,
     // Here, find out two things:
     // 1.  How many materials have mass on a node
     // 2.  Which material has the most mass on a node.  That is the alpha matl.
-    for(NodeIterator iter =patch->getExtraNodeIterator();!iter.done();iter++){
-      IntVector c = *iter;
-      double maxMass=-9.e99;
-      for(unsigned int m = 0; m < numMPMMatls; m++){
-        if(gmass[m][c] > 1.e-16){
-          NumMatlsOnNode[c]++;
-          if(gmass[m][c]>maxMass){
-            // This is the alpha material, all other matls are beta
-            alphaMaterial[c]=m;
-            maxMass=gmass[m][c];
-          }
-        }
-      } // Loop over materials
-      if(NumMatlsOnNode[c]<2){
-        alphaMaterial[c]=-99;
-      }
-    }   // Node Iterator
+    const double minimumMassFraction = 1.0e-10;
+    for(NodeIterator iter = patch->getExtraNodeIterator(); !iter.done(); ++iter) {
+    	IntVector nodeIndex = *iter;
+    	double totalMass = 0.0;
+    	for (size_t matlIndex = 0; matlIndex < numMPMMatls; ++matlIndex) {
+    		totalMass += gmass[matlIndex][nodeIndex];
+    	} // Calculate the total nodal mass.
+    	double maxMassFraction = 0.0;
+    	for (size_t matlIndex = 0; matlIndex < numMPMMatls; ++matlIndex) {
+    		double massFraction = gmass[matlIndex][nodeIndex] / totalMass;
+    		if (massFraction > minimumMassFraction) {
+    			++NumMatlsOnNode[nodeIndex];
+    			if (massFraction > maxMassFraction) {
+    				alphaMaterial[nodeIndex] = matlIndex;
+    				maxMassFraction = massFraction;
+    			}
+    		}
+    	} // Loop over materials
+    	if (NumMatlsOnNode[nodeIndex] < 2) {
+    		alphaMaterial[nodeIndex] = -99;
+    	}
+    } // Loop over nodes
+//    for(NodeIterator iter =patch->getExtraNodeIterator();!iter.done();iter++){
+//      IntVector c = *iter;
+//      double maxMass=-9.e99;
+//      for(unsigned int m = 0; m < numMPMMatls; m++){
+//        if(gmass[m][c] > 1.e-16){
+//          NumMatlsOnNode[c]++;
+//          if(gmass[m][c]>maxMass){
+//            // This is the alpha material, all other matls are beta
+//            alphaMaterial[c]=m;
+//            maxMass=gmass[m][c];
+//          }
+//        }
+//      } // Loop over materials
+//      if(NumMatlsOnNode[c]<2){
+//        alphaMaterial[c]=-99;
+//      }
+//    }   // Node Iterator
 
     // In this section of code, we find the particles that are in the 
     // vicinity of a multi-material node and put their indices in a list

@@ -96,6 +96,14 @@ KEYWORDS
          int NGP;
          int NGN;
 
+         void enforceContact(const 	PatchSubset 	*	patches
+        		 	 	 	,const 	MaterialSubset	*	materials
+							,		DataWarehouse	*	old_dw
+							,		DataWarehouse	*	new_dw
+							,const  VarLabel		* 	label_velocity_to_use
+							);
+
+
       public:
          // Constructor
          LRContact_CoulombAdhesive(const ProcessorGroup* myworld,
@@ -127,6 +135,7 @@ KEYWORDS
          virtual void addComputesAndRequiresIntegrated(SchedulerP & sched,
                                              const PatchSet* patches,
                                              const MaterialSet* matls);
+
       };
 } // End namespace Uintah
 
