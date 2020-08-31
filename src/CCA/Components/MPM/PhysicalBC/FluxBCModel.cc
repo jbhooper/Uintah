@@ -287,17 +287,17 @@ void FluxBCModel::applyExternalScalarFlux(const ProcessorGroup* , const PatchSub
   }  // patch loop
 }
 
-void FluxBCModel::countMaterialPointsPerFluxLoadCurve(const ProcessorGroup*,
-                                                      const PatchSubset* patches,
-                                                      const MaterialSubset*,
-                                                      DataWarehouse* old_dw,
-                                                      DataWarehouse* new_dw)
+void FluxBCModel::countMaterialPointsPerFluxLoadCurve(const ProcessorGroup	*
+                                                     ,const PatchSubset		* patches
+                                                     ,const MaterialSubset	*
+                                                     ,		DataWarehouse	* old_dw
+                                                     ,		DataWarehouse	* new_dw
+													 )
 {
-  printTask(patches, patches->get(0), cout_doing,
-                       "countMaterialPointsPerLoadCurve");
+  printTask(patches, patches->get(0), cout_doing, "countMaterialPointsPerLoadCurve");
   // Find the number of pressure BCs in the problem
   int number_scalar_flux_BCs = 0;
-  for (int ii = 0; ii<(int)MPMPhysicalBCFactory::mpmPhysicalBCs.size(); ii++){
+  for (int ii = 0; ii<(int)MPMPhysicalBCFactory::mpmPhysicalBCs.size(); ii++) {
     std::string bcs_type = MPMPhysicalBCFactory::mpmPhysicalBCs[ii]->getType();
     if (bcs_type == "ScalarFlux") {
       number_scalar_flux_BCs++;
