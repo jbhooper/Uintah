@@ -55,33 +55,37 @@
                                         attribute1="label REQUIRED STRING"
                                         attribute2="type REQUIRED STRING 'variable_math,
                                                                           mass_flow_rate,
-                                                                          poisson'">
+                                                                          poisson,
+                                                                          forcing_turbulence'">
 
           <!-- mass_flow_rate -->
           <!-- The mass_flow_rate utility computes the mass flowrate of inlet and outlet boundary conditions.
                To activate it, create a mass_flow_rate utility, then add "type=Inlet" to any mass flow
-               inlet and "type=Outflow" for any outlet 
+               inlet and "type=Outflow" for any outlet
                for which you wish to have the flow rates. This will create reduction variables
                for saving:
-               <task label>_mdot_g_in : Global total gas inflow rate 
+               <task label>_mdot_g_in : Global total gas inflow rate
                <task label>_mdot_g_out : Global total gas outflow rate
-               <task label>_mdot_p_organics_in : Global total particle organic inflow rate (no ash or H2O) 
-               <task label>_mdot_p_organics_out : Global total particle organic outflow rate (no ash or H2O) 
+               <task label>_mdot_p_organics_in : Global total particle organic inflow rate (no ash or H2O)
+               <task label>_mdot_p_organics_out : Global total particle organic outflow rate (no ash or H2O)
                <task label>_mdot_g_in_* : Gas flow rate through inlet named * (wildcard)
                <task label>_mdot_g_out_* : Gas flow rate through outlet named * (wildcard)
                <task label>_mdot_p_organics_in_ : Particle organics flow rate through inlet named * (wildcard)
                <task label>_mdot_p_organics_out_ : Particle organics flow rate through outlet named * (wildcard)
                Where the <task label> is the label the user assigns to the task (label=<task label>).
-               Note that one may add a scalar to the spec which will compute flowrates of the scalar (as 
-               opposed to the total flow rate) 
+               Note that one may add a scalar to the spec which will compute flowrates of the scalar (as
+               opposed to the total flow rate)
                See inputs/ARCHES/Coal/1GW_MFR.ups for an example of usage.
                For inlets/outlets through intrusions, you will need to compute those separately.
                See inputs/ARCHES/intrusion_mass_balance.ups for an example of usage. This method introduces
                a source term adjacent to the intrusion inlet where SRC = constant * rho * u. The source term is
-               found by saving out the <variable>_RHS term as shown in the example. Sum up <variable>_RHS over 
-               the intrusion inlet to obtain total flow rate. --> 
+               found by saving out the <variable>_RHS term as shown in the example. Sum up <variable>_RHS over
+               the intrusion inlet to obtain total flow rate. -->
 
-          <scalar                       spec="OPTIONAL STRING" 
+          <!-- forcing_turbulence -->
+          <!-- forcing_turbulence utility scales the turbulent kinetic energy of the largest turbulent modes. -->
+
+          <scalar                       spec="OPTIONAL STRING"
                                         need_applies_to="type mass_flow_rate"/> <!-- Add a scalar to the mass flow rate calc. -->
 
           <!-- <grid type=...> represents the variable type. -->
@@ -167,15 +171,17 @@
                                                                           cloudBenchmark,
                                                                           sootVolumeFrac,
                                                                           gasRadProperties,
+                                                                          RMCRTgasRadProperties,
                                                                           partRadProperties,
                                                                           interpolation_var,
                                                                           CO,
                                                                           spectralProperties,
                                                                           constant_scalar_diffusion_coef,
                                                                           gas_kinetic_energy,
-                                                                          wall_thermal_resistance'">
+                                                                          wall_thermal_resistance, 
+                                                                          time_varying'">
 
-              <absorption_modifier        spec="OPTIONAL DOUBLE 'positive'" need_applies_to="type partRadProperties gasRadProperties spectralProperties"/> <!-- multiplicative modifier on gas or particle absorption coefficients, does not affect scattering coefficients -->
+              <absorption_modifier        spec="OPTIONAL DOUBLE 'positive'" need_applies_to="type partRadProperties gasRadProperties RMCRTgasRadProperties spectralProperties"/> <!-- multiplicative modifier on gas or particle absorption coefficients, does not affect scattering coefficients -->
               <scattering_modifier        spec="OPTIONAL DOUBLE 'positive'" need_applies_to="type partRadProperties "/> <!-- multiplicative modifier on particle scattering coefficients, is ignored when radiation scattering is turned off  -->
               <subModel                   spec="REQUIRED STRING  'constantCIF, basic, Coal,tabulated'"   need_applies_to="type partRadProperties" />
 
@@ -196,12 +202,22 @@
               <Qabs                       spec="OPTIONAL DOUBLE 'positive'" need_applies_to="type  partRadProperties"/> <!-- fudge parameter for partcle absorption coefficient model "basic" default is 0.8 tested for SUFCO coal -->
               <radiateAtGasTemp           spec="OPTIONAL BOOLEAN" need_applies_to="type partRadProperties"/> <!-- forces particles and gas temperatures to be the same, in terms of radiation -->
 
-
+              <!-- Time Varing Test Function -->
+              <function                   spec="REQUIRED STRING 'sine, linear'" need_applies_to="type time_varying"/>
+              <!--- sine -->
+              <!-- y = offset + A*sin(2*pi/P*time) -->
+              <Amp                        spec="OPTIONAL DOUBLE" need_applies_to="type time_varying"/>
+              <P                          spec="OPTIONAL DOUBLE" need_applies_to="type time_varying"/>
+              <offset                     spec="OPTIONAL DOUBLE" need_applies_to="type time_varying"/>
+              <!-- linear -->
+              <!-- y = m*time + intercept -->
+              <m                          spec="OPTIONAL DOUBLE" need_applies_to="type time_varying"/>
+              <intercept                  spec="OPTIONAL DOUBLE" need_applies_to="type time_varying"/>
 
 
           <calculator                   spec="REQUIRED NO_DATA"
                                         attribute1="type REQUIRED STRING 'constant, special, burns_christon, radprops, hottel_sarofim, GauthamWSGG'"
-                                        need_applies_to="type gasRadProperties"
+                                        need_applies_to="type gasRadProperties RMCRTgasRadProperties"
                                         >
 
             <temperature                  spec="OPTIONAL NO_DATA"
@@ -235,7 +251,7 @@
 
           <grid                         spec="REQUIRED NO_DATA"
                                         attribute1="type REQUIRED STRING 'CC,FX,FY,FZ'"
-                                        need_applies_to="type constant_property"/>
+                                        need_applies_to="type constant_property, time_varying"/>
           <!-- Constant Property
                 Just create a variable with a constant value
                 Must specify a grid type (CC,FX,FY,FZ)
@@ -328,10 +344,10 @@
                                         attribute1="label REQUIRED STRING"
                                         need_applies_to="type variable_stats"/> <!-- for flux averages, this specifies the density, if not specified then the fluxes wont work -->
           <!-- for CO / equilibrium model -->
-          <CO_defect_label              spec="REQUIRED STRING"
-                                        need_applies_to="type CO"/> <!-- Name of the CO defect -->
-          <CO_rate_label                spec="OPTIONAL STRING"
-                                        need_applies_to="type CO"/> <!-- Name of the arrenhius rate -->
+          <!-- defect label will be: model_label+"_defect"
+               rate label will be: model_label+"_rate" -->
+          <new_on_restart               spec="OPTIONAL NO_DATA"
+                                        need_applies_to="type CO"/> <!-- only use when model is added upon restart - subsequent restarts should have this removed -->
           <A                            spec="OPTIONAL DOUBLE"
                                         need_applies_to="type CO"/> <!-- pre exponential factor kmole/m3/s-->
           <Ea                           spec="OPTIONAL DOUBLE"
@@ -1013,19 +1029,19 @@
                                                                                        label= unique name for this intrusion boundary -->
            <geom_object/>                                                         <!-- geometry object associated with this intrusion -->
 
-           <!-- Some models will allow you to adjust the area that is used in the model calculation from the 
-                stair stepped area provided by the mesh (e.g. wall heat transfer). Use the area_model to specify 
-                the modification to the area. The modified area is computed as: 
-                  A_mod = A_face * factor 
-                where the factor can be computed one of two ways. A_mod would then be used in the physical model 
-                See just below for the details of each option. 
+           <!-- Some models will allow you to adjust the area that is used in the model calculation from the
+                stair stepped area provided by the mesh (e.g. wall heat transfer). Use the area_model to specify
+                the modification to the area. The modified area is computed as:
+                  A_mod = A_face * factor
+                where the factor can be computed one of two ways. A_mod would then be used in the physical model
+                See just below for the details of each option.
                 Note that domain edge boundary conditions are set in the <Grid><BoundaryCondition> section
                 using the Dirichlet option. -->
            <area_model                  spec="OPTIONAL NO_DATA">
-            <!-- physical_area will compute the factor as:  
-                 factor = physical_area / wetted_stairstepped_geometry_area --> 
+            <!-- physical_area will compute the factor as:
+                 factor = physical_area / wetted_stairstepped_geometry_area -->
             <physical_area              spec="OPTIONAL DOUBLE 'positive'"/>
-            <!-- alpha_g is simply a constant: 
+            <!-- alpha_g is simply a constant:
                  factor = alpha_g -->
             <alpha_g                    spec="OPTIONAL DOUBLE 'positive'"/>
            </area_model>
@@ -2095,8 +2111,10 @@
             <!--                 Set "Dirichlet" in the InteriorFace var specficiation and set the value spec (in the InteriorFace spec) to the constant desired -->
             <!--                 Neumann isn't currently supported -->
             <!--                 Note that the value specified in any case is rho*u*phi (flux). -->
-            <!--                 The code takes this value and multiplies by an area to compute the integral on a "face". -->  
+            <!--                 The code takes this value and multiplies by an area to compute the integral on a "face". -->
+            <!--                 The relatize_xyz specifies where (0,0,0) is located. Note that only the two changing dimensions matter -->
             <inputfile                  spec="OPTIONAL STRING" need_applies_to="type fx_inject_src, fy_inject_src, fz_inject_src, cc_inject_src"/>
+            <relative_xyz               spec="REQUIRED VECTOR" need_applies_to="type fx_inject_src, fy_inject_src, fz_inject_src, cc_inject_src"/>
 
             <!-- Radiation models -->
             <calc_frequency             spec="OPTIONAL INTEGER" need_applies_to="type do_radiation rmcrt_radiation" /> <!-- calculate radiation every N steps, default = 3 -->
