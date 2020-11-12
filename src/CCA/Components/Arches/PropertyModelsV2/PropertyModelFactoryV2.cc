@@ -27,6 +27,7 @@
 #include <CCA/Components/Arches/PropertyModelsV2/UnweightVariable.h>
 #include <CCA/Components/Arches/PropertyModelsV2/ConsScalarDiffusion.h>
 #include <CCA/Components/Arches/PropertyModelsV2/GasKineticEnergy.h>
+#include <CCA/Components/Arches/PropertyModelsV2/TimeVaryingProperty.h>
 #include <libxml/parser.h>
 #include <libxml/tree.h>
 
@@ -175,7 +176,7 @@ PropertyModelFactoryV2::register_all_tasks( ProblemSpecP& db )
         register_task( name, tsk, db_model );
         _pre_table_post_iv_update.push_back(name);
 
-      } else if ( type == "gasRadProperties" ){
+      } else if ( type == "gasRadProperties" || type == "RMCRTgasRadProperties" ){
 
         TaskInterface::TaskBuilder* tsk = scinew gasRadProperties::Builder( name, 0 );
         register_task( name, tsk, db_model );
@@ -226,6 +227,30 @@ PropertyModelFactoryV2::register_all_tasks( ProblemSpecP& db )
         register_task( name, tsk, db_model );
         _pre_update_property_tasks.push_back(name);
 
+      } else if ( type == "time_varying"){
+
+        std::string var_type = "NA";
+        db_model->findBlock("grid")->getAttribute("type",var_type);
+
+        TaskInterface::TaskBuilder* tsk;
+        if ( var_type == "CC" ){
+          tsk = scinew TimeVaryingProperty<CCVariable<double> >::Builder(name, 0);
+          _pre_update_property_tasks.push_back(name);
+        } else if ( var_type == "FX" ){
+          tsk = scinew TimeVaryingProperty<SFCXVariable<double> >::Builder(name, 0);
+          _pre_update_property_tasks.push_back(name);
+        } else if ( var_type == "FY" ){
+          tsk = scinew TimeVaryingProperty<SFCYVariable<double> >::Builder(name, 0);
+          _pre_update_property_tasks.push_back(name);
+        } else if ( var_type == "FZ" ){
+          tsk = scinew TimeVaryingProperty<SFCZVariable<double> >::Builder(name, 0);
+          _pre_update_property_tasks.push_back(name);
+        } else {
+          throw InvalidValue("Error: Property grid type not recognized for model: "+name,__FILE__,__LINE__);
+        }
+        register_task( name, tsk, db_model );
+        _pre_update_property_tasks.push_back(name);
+
       } else {
 
         throw InvalidValue("Error: Property model not recognized: "+type,__FILE__,__LINE__);
@@ -251,7 +276,7 @@ PropertyModelFactoryV2::register_all_tasks( ProblemSpecP& db )
           for ( ProblemSpecP db_src = db_source->findBlock("src"); db_src != nullptr; db_src = db_src->findNextBlock("src")){
             std::string radiation_model;
             db_src->getAttribute("type", radiation_model);
-            if (radiation_model == "do_radiation" ){
+            if (radiation_model == "do_radiation" || radiation_model== "rmcrt_radiation"){
               std::string task_name="sumRadiation::abskt";
               TaskInterface::TaskBuilder* tsk = scinew sumRadiation::Builder( task_name, 0 );
               register_task( task_name, tsk, db_m );

@@ -85,7 +85,8 @@ namespace WasatchCore{
       Expr::ExpressionFactory& factory   = *gc_[ADVANCE_SOLUTION]->exprFactory;
 
       typedef typename TurbulentDiffusivity::Builder TurbDiffT;
-      factory.register_expression( scinew TurbDiffT( turbDiffTag_, densityTag_, turbulenceParams.turbSchmidt, turbViscTag ) );
+      if (!factory.have_entry(turbDiffTag_))
+        factory.register_expression( scinew TurbDiffT( turbDiffTag_, densityTag_, turbulenceParams.turbSchmidt, turbViscTag ) );
     } // if(enableTurbulence_)
 
     // define the primitive variable and solution variable tags and trap errors
@@ -314,6 +315,16 @@ namespace WasatchCore{
          sourceTermParams=sourceTermParams->findNextBlock("SourceTermExpression") ) {
       srcTags.push_back( parse_nametag( sourceTermParams->findBlock("NameTag") ) );
     }
+    
+    for( Uintah::ProblemSpecP sourceTermParams=params_->findBlock("TargetValueSource");
+        sourceTermParams != nullptr;
+        sourceTermParams=sourceTermParams->findNextBlock("TargetValueSource") ) {
+      
+      Expr::ExpressionFactory& factory = *gc_[ADVANCE_SOLUTION]->exprFactory;
+      
+      srcTags.push_back( parse_nametag( sourceTermParams->findBlock("NameTag") ) );
+    }
+
   }
 
   //------------------------------------------------------------------
