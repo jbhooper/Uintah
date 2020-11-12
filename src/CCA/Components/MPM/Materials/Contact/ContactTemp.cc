@@ -1,4 +1,4 @@
-#include <CCA/Components/MPM/Materials/Contact/LRContact_CoulombAdhesive.cc>
+#include "LRContact_CoulombAdhesive_Ancient.cc"
 
 void LRContact_CoulombAdhesive::exMomInterpolated(const ProcessorGroup*,
                                         const PatchSubset* patches,

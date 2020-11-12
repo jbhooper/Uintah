@@ -42,7 +42,7 @@ using namespace std;
 ScalarFluxBC::ScalarFluxBC(ProblemSpecP& ps, const GridP& grid,
                        const MPMFlags* flags)
 {
-  d_outwardNormal = Vector(0.0, 0.0, 0.0);
+  d_outwardNormal = true;
   // First read the geometry information
   // d_surface is the geometry object containing the surface to be loaded.
 #if 0

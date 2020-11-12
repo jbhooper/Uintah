@@ -127,7 +127,7 @@ void AutoCycleFluxBC::initializeScalarFluxBC(	const 	ProcessorGroup	*
 
           if (cout_doing.active()){
             cout_doing << "    Load Curve = "
-                       << number_autocycle_flux_BCs << " Num Particles = " << numPart << std::endl;
+                       << number_autocycle_flux_BCs << " Num Particles = " << numberBCParticles << std::endl;
           }
         }   // if pressure loop
       }    // loop over all Physical BCs
