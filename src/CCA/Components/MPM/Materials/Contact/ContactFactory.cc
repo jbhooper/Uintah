@@ -40,10 +40,13 @@
 using namespace std;
 using namespace Uintah;
 
-Contact* ContactFactory::create(const ProcessorGroup* myworld,
-                                const ProblemSpecP& ps, MaterialManagerP &ss,
-                                MPMLabel* lb, MPMFlags* flag, bool &needNormals,
-                                bool &useLogisticRegression)
+Contact* ContactFactory::create(const 	ProcessorGroup		* 	myworld					,
+                                const 	ProblemSpecP		& 	ps						,
+										MaterialManagerP	&	ss						,
+										MPMLabel			* 	lb						,
+										MPMFlags			* 	flag					,
+										bool 				&	needNormals				,
+										bool 				&	useLogisticRegression	)
 {
 
    ProblemSpecP mpm_ps = 
@@ -60,7 +63,6 @@ Contact* ContactFactory::create(const ProcessorGroup* myworld,
    useLogisticRegression=false;
 
    for( ProblemSpecP child = mpm_ps->findBlock( "contact" ); child != nullptr; child = child->findNextBlock( "contact" ) ) {
-     
      std::string con_type;
      child->getWithDefault("type",con_type, "null");
      
@@ -99,7 +101,6 @@ Contact* ContactFactory::create(const ProcessorGroup* myworld,
      }
    }
 
-   // 
    if( contact_list->size() == 0 ) {
      proc0cout << "no contact - using null\n";
      contact_list->add(scinew NullContact(myworld,ss,lb,flag));

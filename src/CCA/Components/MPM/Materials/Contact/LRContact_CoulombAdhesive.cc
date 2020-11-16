@@ -49,10 +49,12 @@ using std::string;
 using namespace std;
 
 
-LRContact_CoulombAdhesive::LRContact_CoulombAdhesive(const ProcessorGroup* myworld,
-                                 ProblemSpecP& ps,MaterialManagerP& d_sS,
-                                 MPMLabel* Mlb,MPMFlags* MFlag)
-  : Contact(myworld, Mlb, MFlag, ps)
+LRContact_CoulombAdhesive::LRContact_CoulombAdhesive(const 	ProcessorGroup		* myworld
+                                 	 	 	 	 	,	 	ProblemSpecP		& ps
+												    ,		MaterialManagerP	& d_sS
+													,		MPMLabel			* Mlb
+													,		MPMFlags			* MFlag
+  	  	  	  	  	  	  	  	  	  	  	  	  	): Contact(myworld, Mlb, MFlag, ps)
 {
   ps->require("mu",d_mu);
   ps->getWithDefault("adhesive_layer_fraction",	d_adhesiveThickness, 	0.05);
@@ -101,7 +103,8 @@ void LRContact_CoulombAdhesive::enforceContact(const	PatchSubset		*	patches
 	// Referenced papers:
 	// [CPM]   Nairn et. al., Computational Particle Mechanics, 5, 285-296 (2018)
 	// [CMES]  Nairn,         Comput. Modeling in Engrg. & Sci., 92, 271-299 (2013)
-	// [CMAME[ Nairn et. al., Comput. Methods Appl. Mech. Engrg. 362, 112859 (2020)
+	// [CMAME] Nairn et. al., Comput. Methods Appl. Mech. Engrg. 362, 112859 (2020)
+
 	Ghost::GhostType  gnone = Ghost::None;
 	delt_vartype delT;
 	old_dw->get(delT, lb->delTLabel, getLevel(patches));
@@ -140,7 +143,6 @@ void LRContact_CoulombAdhesive::enforceContact(const	PatchSubset		*	patches
 			IntVector nodeIndex = *iter;
 			const double nodalWeight = 8.0 * NC_CCweight[nodeIndex];
 			const int alpha = alphaMaterial[nodeIndex];
-
 			// Calculate nodal volume for axisymmetric problems
 			if(flag->d_axisymmetric)	{  // Nodal volume isn't constant for axisymmetry  // volume = r*dr*dtheta*dy  (dtheta = 1 radian)
 				double r = min((patch->getNodePosition(nodeIndex)).x(),.5*dx.x());
@@ -153,14 +155,15 @@ void LRContact_CoulombAdhesive::enforceContact(const	PatchSubset		*	patches
 				double m_CoM = 0.0;
 				double nodalVolume = 0.0;
 				for (int matlIndex = 0; matlIndex < numMatls; ++matlIndex) {
-					if (d_matls.requested(matlIndex)) {
+//					if (d_matls.requested(matlIndex)) {
 						p_CoM += gvelocity[matlIndex][nodeIndex] * gmass[matlIndex][nodeIndex];
 						m_CoM += gmass[matlIndex][nodeIndex];
 						nodalVolume += gvolume[matlIndex][nodeIndex] * nodalWeight;
-					}
+//					}
 				}
 				double alphaMass = gmass[alpha][nodeIndex];
 
+				bool debug_interface = false;
 				v_CoM = p_CoM/m_CoM;
 				if ( (nodalVolume * invCellVolume) > d_vol_const) { // Ensure node is populated enough to calculate on
 					const Vector betaNormal = -1.0*normAlphaToBeta[nodeIndex];
@@ -169,6 +172,21 @@ void LRContact_CoulombAdhesive::enforceContact(const	PatchSubset		*	patches
 						if (d_matls.requested(matlIndex) && matlIndex != alpha) {
 							double matlMass = gmass[matlIndex][nodeIndex];
 							if (matlMass > minimumMassToCalculate) {
+								if (debug_interface) {
+								  std::cerr << "Patch: " << p << " Num Matls: " << numMatls;
+								  std::cerr << " Node: " << nodeIndex << " alpha Material: " << alpha;
+								  std::cerr << " Other material interacting: " << matlIndex;
+								  std::cerr << " m_CoM: " << m_CoM << " Alpha Mass: " << alphaMass;
+								  std::cerr << " Beta mass: " << betaMass << "  Matl mass: " << matlMass << std::endl;
+								  if (betaMass <= 0) {
+									  std::cerr << "      ";
+									  for (int matlIndex = 0; matlIndex < numMatls; ++matlIndex) {
+										  std::cerr << " mass[" << matlIndex << "]: " << gmass[matlIndex][nodeIndex];
+									  }
+									  std::cerr << std::endl;
+								  }
+
+								}
 								double materialSeparation = gmatlprominence[matlIndex][nodeIndex] - gmatlprominence[alpha][nodeIndex];
 								const Vector deltaVelocity = gvelocity[matlIndex][nodeIndex] - v_CoM;
 								const double deltaV_normal = Dot(deltaVelocity, betaNormal);
@@ -192,7 +210,6 @@ void LRContact_CoulombAdhesive::enforceContact(const	PatchSubset		*	patches
 								double Ac = sqrt(2.0*nodalVolume*min(alphaVol,nodalVolume - alphaVol))/hPerp;
 								double velocity_to_stress = betaMass / (Ac * delT);
 								double stress_to_velocity = (Ac * delT)/betaMass;
-
 								// Sstick Ac dt = betaMass * deltaV_tangent
 								double S_stick = deltaV_tangent * velocity_to_stress;
 								S_stick = deltaV_tangent_reproject * velocity_to_stress;
@@ -249,7 +266,6 @@ void LRContact_CoulombAdhesive::enforceContact(const	PatchSubset		*	patches
 				                        min_tang_magnitude = Min(v_slide, deltaV_tangent_reproject);
 										tangent_deltaV = min_tang_magnitude*betaTangent;
 										minSlideMagnitude = Min(S,S_stick);
-//										deltaV_corr = -normBeta_deltaV - tangent_deltaV;
 										deltaV_corr = normal_corr_from_stress - tangent_corr_from_stress;
 #ifdef JIMCOMP
 //										std::cerr << " FRICTION:" << std::endl;
@@ -302,115 +318,6 @@ void LRContact_CoulombAdhesive::enforceContact(const	PatchSubset		*	patches
 					} // Loop over all materials
 				} // Nodal volume occupied enough to justify calculation
 			} // Node is multimaterial node.
-
-//			if( alpha >= 0 )  {
-//			  if ( (nodalVolume*invCellVolume) > d_vol_const) {
-//				  // Only directions for normal are +/- the alpha normal per LR description [CMAME]
-//				  Vector alphaNormal = normAlphaToBeta[nodeIndex];
-//				  double d_n = Dot(deltaPAlpha, alphaNormal); // [CPM] eq. 15
-//				  const Vector dP_alpha_normal = d_n * alphaNormal;
-//				  Vector alphaTangent = (deltaPAlpha - dP_alpha_normal).safe_normal();
-//				  double d_t = Dot(deltaPAlpha, alphaTangent); // [CPM] eq. 15
-//				  const Vector dP_alpha_tangent = d_t * alphaTangent;
-//
-//				  double alphaVol = gvolume[alpha][nodeIndex];  // Volume of alpha material
-//				  double betaVol = nodalVolume - alphaVol; 		// Volume of non-alpha materials
-//				  double Ac = sqrt(2.0*nodalVolume*min(alphaVol,betaVol))/hPerp; // Contact area
-//
-//				  double momentum_to_stress = 1.0/(Ac * delT);
-//				  double normal_stress = -d_n * momentum_to_stress; // N
-//				  double tangent_stress = d_t * momentum_to_stress; // S_stick
-//
-//				  // It's easiest to use the alpha correction as a reference
-//				  double alphaMass = gmass[alpha][nodeIndex];
-////				  Vector v_alpha_normal = dP_alpha_normal / alphaMass;
-////				  Vector v_alpha_tangent = dP_alpha_tangent / alphaMass;
-//
-//				  // separationOffset: Maximum separation for contact interactions.
-//				  double separationOffset = d_adhesiveThickness*hPerp;
-//				  double zeroOffset = 0.01*hPerp;
-//				  if (hPerp != dx.x()) {
-//					  std::cerr << "ERROR:  hPerp != dx.x(): hPerp: " << hPerp << " dx.x(): " << dx.x() << " Grid is equal: " << equalGrid << " \n";
-//				  }
-//
-//				  double betaMass = m_CoM-alphaMass; // Lumped mass of all non-alpha materials
-//				  for (int matlIndex = 0; matlIndex < numMatls; ++matlIndex) {
-//					  double matlMass = gmass[matlIndex][nodeIndex]; // Not the same as betaMass
-//					  double betaFraction = matlMass/betaMass;  // Fraction of beta material this material comprises
-//					  double massFraction = matlMass/m_CoM;     // Fraction of total mass made up of this specific material
-//					  if (d_matls.requested(matlIndex) && (matlIndex != alpha) && (betaFraction > 1e-5) && (massFraction > 1e-5)) {
-//						  // Material in contact model, not alpha, and mass fractions substantial enough to consider
-//						  double matlSeparation = gmatlprominence[matlIndex][nodeIndex] - gmatlprominence[alpha][nodeIndex]; //[CMAME] eq. 24
-//						  //  	   matlSeparation <= 0 				 => In contact. [CMAME] eq. 14; 24
-//						  //   0 < matlSeparation < separationOffset => Possible adhesion
-//						  if (matlSeparation <= separationOffset) { // In contact
-//							  Vector delta_v_material = gvelocity[matlIndex][nodeIndex] - v_CoM;
-//							  Vector deltaVelocity = gvelocity[matlIndex][nodeIndex] - v_CoM; //!! Jim TODO
-//							  Vector normal = -1.0*normAlphaToBeta[nodeIndex]; //!! Jim TODO
-//							  double normalDeltaVel = Dot(deltaVelocity,normal); //!! Jim TODO
-//							  // All non-alpha materials have a normal opposite the alpha normal
-//							  double matl_normal_dot_delta_v = Dot(-alphaNormal,delta_v_material);
-//							  if (fabs(matl_normal_dot_delta_v - normalDeltaVel) > 1e-16) {
-//							    std::cerr << "normalDeltaVel: " << normalDeltaVel << " matl_normal_dot_delta_v: " << matl_normal_dot_delta_v << " Difference: " << matl_normal_dot_delta_v - normalDeltaVel << std::endl;
-//							  }
-//							  Vector dv_beta(0.0, 0.0, 0.0);
-//							  if ((matlSeparation <= zeroOffset) && (matl_normal_dot_delta_v > 0.0)) { // Potentially compressive
-//								  Vector normal_normalDV = normal*normalDeltaVel; //!! Jim TODO
-//								  if ((normal_normalDV - dP_alpha_normal/betaMass).length() > 1.0e-16) {
-//								    std::cerr << "normal_normalDV: " << normal_normalDV << " dP_alpha_normal: " << dP_alpha_normal/betaMass << std::endl;
-//								  }
-//								  Vector dV_normalDV = deltaVelocity - normal_normalDV; //!! Jim TODO
-//								  Vector surfaceTangent = dV_normalDV/(dV_normalDV.length()+1.e-100);//!! Jim TODO
-//								  if ((surfaceTangent - alphaTangent).length() > 1.0e-16) {
-//									  std::cerr << "SurfaceTangent: " << surfaceTangent << " alphaTangent: " << alphaTangent << " differential length: " << (surfaceTangent-alphaTangent).length() << std::endl;
-//								  }
-//								  std::cerr << "Alpha_delta_V:" << normal_normalDV + dV_normalDV << " delta_v_from_dP: " << deltaPAlpha/betaMass << std::endl;
-//								  double tangentDeltaVelocity = Dot(deltaVelocity, surfaceTangent);//!! Jim TODO
-//								  std::cerr << "TangentDeltaVelocity: " << tangentDeltaVelocity << " tangentStress/betaMass: " << tangent_stress/betaMass << std::endl;
-//								  double frictionCoefficient = Min(d_mu,tangentDeltaVelocity/fabs(normalDeltaVel));//!! Jim TODO
-//								  // If materials in contact, then friction can apply:
-//								  // S_slide is the stress threshold necessary to transition from stick to slide.
-//								  double S_slide = d_shearAdhesion - d_mu * normal_stress; // [CPM Eq. 24]
-//								  if (fabs( fabs(S_slide*Ac*delT/betaMass) - fabs( d_mu*fabs(normalDeltaVel) ) ) > 1.0e-16) {
-//								    std::cerr << " frictionCoeff*fabs(normalDeltaVel): " << frictionCoefficient*fabs(normalDeltaVel) << " S_slide * Ac * delT: " << S_slide * Ac * delT/betaMass << " mu*N: " << d_mu*fabs(normalDeltaVel) << std::endl;
-//								  }
-//								  if (tangent_stress > S_slide) { // Required stress > that required to slide
-//									  // Tangential momentum of sliding:  S_slide * Ac * delta_t
-//									  dv_beta = (-dP_alpha_normal - (S_slide * Ac * delT)*alphaTangent)/betaMass;
-//									  std::cerr << "Slide:  Jim Dv: " << (-normal_normalDV - surfaceTangent*frictionCoefficient*fabs(normalDeltaVel)) << " My Dv: " << dv_beta << std::endl;
-//								  } else {
-//									  dv_beta = (dP_alpha_normal - dP_alpha_tangent)/betaMass; // Stick condition
-//									  std::cerr << "Stick:  Jim Dv: " << (-normal_normalDV - surfaceTangent*frictionCoefficient*fabs(normalDeltaVel)) << " My Dv: " << dv_beta << std::endl;
-//								  }
-//							  } else if (fabs(d_normalAdhesion) > 0 && fabs(d_shearAdhesion)> 0) { // Check for adhesion
-//								  double normal_stress_ratio = normal_stress / d_normalAdhesion;  // S_stick/S_a
-//								  double tangent_stress_ratio = tangent_stress / d_shearAdhesion; // N/N_a
-//								  bool is_adhered = (normal_stress_ratio*normal_stress_ratio + tangent_stress_ratio*tangent_stress_ratio) <= 1;
-//								  if (is_adhered) {
-//									  // std::cerr << "ADHESIVE! Normal Stress: " << normal_stress << " Tangent Stress: " << tangent_stress << "\n";
-//									  dv_beta = (dP_alpha_normal - dP_alpha_tangent)/betaMass; // Adhered, so stick conditions
-//								  } else {
-//									  // Do nothing; we have no constraints on the motion of the material.
-//									  // FIXME TODO Should we instead subtract the necessary velocity to overcome the adhesion?
-//								  }
-//							  }
-////							   I have no idea what thi sis supposed to do.  It seems to always be 1? FIXME TODO JBH
-////							   double fudgeFactor = max(1.0,(separationOffset - d_LR)/separationOffset); // Why?
-////							   p_correct = p_correct * fudgeFactor;
-////							   gvelocity[matlIndex][nodeIndex] += p_correct/matlMass;
-////							   gvelocity[alpha][nodeIndex]     -= p_correct/alphaMass;
-//
-//							  // Update this material's velocity and the alpha velocity.
-//							  // We update alpha velocity incrementally in case some portions of the ostensible beta mass
-//							  //   don't end up contributing.
-//							  gvelocity[alpha][nodeIndex] -= (dv_beta)*(gmass[matlIndex][nodeIndex]/alphaMass);
-//							  gvelocity[matlIndex][nodeIndex] += dv_beta;
-//						  } // Surface within contact/adhesion distance
-//					  } // Material is requested, not alpha, and has fractional sufficient fractional representation as part of overall and
-//					  //   response mass fraction.
-//				  }  // Loop over materials
-//			  }  // Volume fraction above d_vol_const
-//		  }  // multimaterial node (alpha > 0)
 	  }  // Loop over nodes
   } // Loop over patches
 }
@@ -437,12 +344,12 @@ void LRContact_CoulombAdhesive::exMomIntegrated(const ProcessorGroup	*			,
   } // d_oneOrTwoSteps == 2
 } // LRContact_CoulombAdhesive::exMomIntegrated
 
-void LRContact_CoulombAdhesive::addComputesAndRequiresInterpolated(SchedulerP & sched,
-                                                        const PatchSet* patches,
-                                                        const MaterialSet* ms)
+void LRContact_CoulombAdhesive::addComputesAndRequiresInterpolated(		 SchedulerP 	& sched
+                                                        		  ,const PatchSet		* patches
+																  ,const MaterialSet	* ms
+																  )
 {
-  Task * t = scinew Task("Friction::exMomInterpolated", 
-                      this, &LRContact_CoulombAdhesive::exMomInterpolated);
+  Task * t = scinew Task("Friction::exMomInterpolated", this, &LRContact_CoulombAdhesive::exMomInterpolated);
 
   MaterialSubset* z_matl = scinew MaterialSubset();
   z_matl->add(0);
@@ -464,12 +371,12 @@ void LRContact_CoulombAdhesive::addComputesAndRequiresInterpolated(SchedulerP & 
     delete z_matl; // shouln't happen, but...
 }
 
-void LRContact_CoulombAdhesive::addComputesAndRequiresIntegrated(SchedulerP & sched,
-                                                       const PatchSet* patches,
-                                                       const MaterialSet* ms) 
+void LRContact_CoulombAdhesive::addComputesAndRequiresIntegrated(		SchedulerP 	& sched
+                                                       	   	    ,const 	PatchSet	* patches
+																,const 	MaterialSet	* ms
+																)
 {
-  Task * t = scinew Task("Friction::exMomIntegrated", 
-                      this, &LRContact_CoulombAdhesive::exMomIntegrated);
+  Task * t = scinew Task("Friction::exMomIntegrated", this, &LRContact_CoulombAdhesive::exMomIntegrated);
 
   MaterialSubset* z_matl = scinew MaterialSubset();
   z_matl->add(0);
