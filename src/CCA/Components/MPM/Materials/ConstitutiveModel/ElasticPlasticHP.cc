@@ -335,6 +335,10 @@ ElasticPlasticHP::getInitialPorosityData(ProblemSpecP& ps)
   ps->getWithDefault("frac_nucleation",               d_porosity.fn,            0.1);
   ps->getWithDefault("meanstrain_nucleation",         d_porosity.en,            0.3);
   ps->getWithDefault("stddevstrain_nucleation",       d_porosity.sn,            0.1);
+  if (d_porosity.sn <= 0.0) {
+	  d_porosity.sn = 1.0e-12;
+	  std::cerr << "WARNING:  Adjusting porosity standard deviation to 1.0e-12 to prevent NaN.\n";
+  }
   ps->getWithDefault("initial_porosity_distrib",      d_porosity.porosityDist,  "constant");
 }
 
@@ -3086,6 +3090,15 @@ ElasticPlasticHP::updatePorosity(const Matrix3& D,
   //cout << "Porosity::fdot_gr = " << fdot_grow 
   //     << " fdot_nucl = " << fdot_nucl << " f = " << f 
   //     << " f_new = " << f_new << endl;
+//  if (d_porosity.sn < 1e-6) {
+//	  std::cerr << "Porosity Debugging:" << std::endl;
+//	  std::cerr << "\tfdot_grow: " << fdot_grow << std::endl;
+//	  std::cerr << "\tporosity_stddev: " << d_porosity.sn << std::endl;
+//	  std::cerr << "\tA: " << A << std::endl;
+//	  std::cerr << "\tfdot_nucl: " << fdot_nucl << std::endl;
+//  } else {
+//	  std::cerr << "Porosity std dev is somehow: " << d_porosity.sn << std::endl;
+//  }
   return f_new;
 }
 //______________________________________________________________________
