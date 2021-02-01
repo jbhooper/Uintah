@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='ISO-8859-1' ?>
+<!-- Set of unconnected voronoi cells. -->
+<Uintah_Include>
+         <diffusion_model type = "non_linear1">
+           <diffusivity>  1.0e-11   </diffusivity>
+           <max_concentration> 1.0 </max_concentration>
+           <use_pressure>true</use_pressure>
+           <tuning1> 6.00  </tuning1>
+           <tuning2> 0.50  </tuning2>
+           <tuning3> 0.0   </tuning3>
+           <tuning4> 3.0   </tuning4>
+           <tuning5> 1e-6  </tuning5>
+         </diffusion_model>
+</Uintah_Include>

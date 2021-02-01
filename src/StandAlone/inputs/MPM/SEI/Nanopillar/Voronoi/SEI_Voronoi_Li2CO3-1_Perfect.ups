@@ -1,0 +1,419 @@
+<?xml version='1.0' encoding='ISO-8859-1' ?>
+<!--
+  Yield Stress
+  Pillar: .7 GPa
+  Substrate: .7GPa
+
+  Units used for this simulation,
+  *  density  -> picogram/micrometer^3
+  *  pressure -> picogram / (microsecond^2 * micrometer)
+  *  temperature -> K, kelvin
+  *  diffusivity -> micrometer^2 / microsecond
+
+  Conversions
+  *  density  -> 1 kg/m^3 = 1e-3 picogram/micrometer^3
+  *  pressure -> 1 GPa = 1e6 picogram / (microsecond^2 * micrometer)
+  *  diffusivity -> 1 m^2/s = 1e6 micrometer^2/microsecond
+-->
+<Uintah_specification>
+
+   <Meta>
+       <title>Voronoi Tiled SEI</title>
+   </Meta>    
+
+   <SimulationComponent type="mpm" />
+
+   <Time>
+     <maxTime>3.0e9</maxTime>
+     <initTime>0.0</initTime>
+     <delt_min>1.0e-16</delt_min>
+     <delt_max>1.0e6</delt_max>
+     <!--     <max_Timesteps>1</max_Timesteps> -->
+     <timestep_multiplier>0.75</timestep_multiplier>
+   </Time>    
+
+   <!-- Control output spew -->
+   <SimulationController>
+     <RuntimeStats>
+       <frequency>10</frequency>
+       <onTimeStep>1</onTimeStep>
+     </RuntimeStats>
+   </SimulationController>
+
+
+   <DataArchiver>
+      <filebase>data.Li2CO3_Voronoi_2.0C_100Seeds_PerfectInterface_NiSubstrate.uda</filebase>
+      <outputInterval>5.0e6</outputInterval>
+      <save label = "p.x"/>
+      <save label = "p.stress"/>
+      <save label = "p.mass"/>
+      <save label = "p.area"/>
+      <save label = "p.volume"/>
+      <save label = "p.concentration"/>
+      <save label = "p.plasticStrain"/>
+      <save label = "p.localizedMPM"/>
+      <save label = "p.porosity"/>
+      <save label = "p.particleID"/>
+      <save label = "p.scalefactor"/>
+      <save label = "p.color"/>
+      <save label = "g.mass"/>
+      <checkpoint cycle = "2" interval = "5e6"/>
+   </DataArchiver>
+
+   <MPM>
+     <time_integrator>explicit</time_integrator>
+     <interpolator>cpdi</interpolator>
+     <cpdi_lcrit>0.95</cpdi_lcrit>
+     <use_load_curves> true </use_load_curves>
+     <do_scalar_diffusion>true</do_scalar_diffusion>
+     <do_auto_cycle_bc> true </do_auto_cycle_bc>
+     <auto_cycle_use_minmax> true </auto_cycle_use_minmax>
+     <auto_cycle_max> .90 </auto_cycle_max>
+     <auto_cycle_min> .13 </auto_cycle_min>
+     <withColor> true </withColor>
+     <DoPressureStabilization> false </DoPressureStabilization>
+   </MPM>
+
+   <PhysicalConstants>
+      <gravity>            [0,0,0]   </gravity>
+   </PhysicalConstants>
+
+   <MaterialProperties>
+     <MPM>
+       <material name="Si_Anode">
+         <density>2.33e22</density>
+         <melt_temp> 2000.0 </melt_temp>
+         <do_conc_reduction> true </do_conc_reduction>
+         <thermal_conductivity>0.0</thermal_conductivity>
+         <specific_heat>5</specific_heat>
+         <erosion algorithm = "ZeroStress"/>
+         <include href="./Materials/Si_ConstitutiveModel.xml"/>
+         <include href="./Materials/Si_DiffusionModel.xml"/>
+         <geom_object>
+           <cylinder label = "anode">
+             <bottom>[0.0,0.0,0.1] </bottom>
+             <top>   [0.0,0.0,0.15]</top>
+             <radius> 0.25   </radius>
+           </cylinder>
+           <res>                 [2,2,2]         </res>
+           <velocity>            [0.0,0.0,0.0]   </velocity>
+           <temperature>         0             </temperature>
+           <color> 8 </color>
+           <concentration> 0 </concentration>
+         </geom_object>
+       </material>
+
+       <material name="substrate">
+         <density>8.908e22</density>
+         <melt_temp> 2000.0 </melt_temp>
+         <do_conc_reduction> false </do_conc_reduction>
+         <erosion algorithm = "ZeroStress"/>
+         <thermal_conductivity>0.0</thermal_conductivity>
+         <specific_heat>5</specific_heat>
+         <include href="./Materials/Substrate_Material.xml"/>
+         <include href="./Materials/Substrate_Diffusion.xml"/>
+         <geom_object>
+           <box label = "substrate">
+             <min>[0, 0, 0.0]</min>
+             <max>[ 0.5,  0.5, 0.1]</max>
+           </box>
+           <color> 9 </color>
+           <res>[2,2,2]</res>
+           <velocity>[0.0,0.0,0.0]</velocity>
+           <temperature>0</temperature>
+           <concentration> 0 </concentration>
+         </geom_object>
+       </material>
+
+       <material name="sei_0">
+         <density>2.11e22</density>
+         <melt_temp> 2000.0 </melt_temp>
+         <do_conc_reduction> false </do_conc_reduction>
+         <thermal_conductivity>0.0</thermal_conductivity>
+         <specific_heat>5</specific_heat>
+
+         <include href="./Materials/SEI_Constitutive_Plastic_ZeroStress.xml"/>
+         <include href="./Materials/SEI_Diffusion_Model.xml"/> 
+  
+         <geom_object>
+           <intersection>
+             <include href="./Geometry/SEI_Blank.xml"/>
+             <union>
+               <include href="./Geometry/Voronoi_0.xml"/>
+             </union>
+           </intersection>
+           <color> 0 </color>
+           <res>[2,2,2]</res>
+           <velocity>[0.0,0.0,0.0]</velocity>
+           <temperature>0</temperature>
+           <concentration> 0 </concentration>
+         </geom_object>
+       </material>
+       
+       <material name="sei_1">
+         <density>2.11e22</density>
+         <melt_temp> 2000.0 </melt_temp>
+         <do_conc_reduction> false </do_conc_reduction>
+         <thermal_conductivity>0.0</thermal_conductivity>
+         <specific_heat>5</specific_heat>
+
+         <include href="./Materials/SEI_Constitutive_Plastic_ZeroStress.xml"/>
+         <include href="./Materials/SEI_Diffusion_Model.xml"/> 
+  
+         <geom_object>
+           <intersection>
+             <include href="./Geometry/SEI_Blank.xml"/>
+             <union>
+               <include href="./Geometry/Voronoi_1.xml"/>
+             </union>
+           </intersection>
+           <color> 1 </color>
+           <res>[2,2,2]</res>
+           <velocity>[0.0,0.0,0.0]</velocity>
+           <temperature>0</temperature>
+           <concentration> 0 </concentration>
+         </geom_object>
+       </material>
+       
+       <material name="sei_2">
+         <density>2.11e22</density>
+         <melt_temp> 2000.0 </melt_temp>
+         <do_conc_reduction> false </do_conc_reduction>
+         <thermal_conductivity>0.0</thermal_conductivity>
+         <specific_heat>5</specific_heat>
+
+         <include href="./Materials/SEI_Constitutive_Plastic_ZeroStress.xml"/>
+         <include href="./Materials/SEI_Diffusion_Model.xml"/> 
+  
+         <geom_object>
+           <intersection>
+             <include href="./Geometry/SEI_Blank.xml"/>
+             <union>
+               <include href="./Geometry/Voronoi_2.xml"/>
+             </union>
+           </intersection>
+           <color> 2 </color>
+           <res>[2,2,2]</res>
+           <velocity>[0.0,0.0,0.0]</velocity>
+           <temperature>0</temperature>
+           <concentration> 0 </concentration>
+         </geom_object>
+       </material>
+       
+       <material name="sei_3">
+         <density>2.11e22</density>
+         <melt_temp> 2000.0 </melt_temp>
+         <do_conc_reduction> false </do_conc_reduction>
+         <thermal_conductivity>0.0</thermal_conductivity>
+         <specific_heat>5</specific_heat>
+
+         <include href="./Materials/SEI_Constitutive_Plastic_ZeroStress.xml"/>
+         <include href="./Materials/SEI_Diffusion_Model.xml"/> 
+  
+         <geom_object>
+           <intersection>
+             <include href="./Geometry/SEI_Blank.xml"/>
+             <union>
+               <include href="./Geometry/Voronoi_3.xml"/>
+             </union>
+           </intersection>
+           <color> 3 </color>
+           <res>[2,2,2]</res>
+           <velocity>[0.0,0.0,0.0]</velocity>
+           <temperature>0</temperature>
+           <concentration> 0 </concentration>
+         </geom_object>
+       </material>
+
+       <material name="sei_4">
+         <density>2.11e22</density>
+         <melt_temp> 2000.0 </melt_temp>
+         <do_conc_reduction> false </do_conc_reduction>
+         <thermal_conductivity>0.0</thermal_conductivity>
+         <specific_heat>5</specific_heat>
+
+         <include href="./Materials/SEI_Constitutive_Plastic_ZeroStress.xml"/>
+         <include href="./Materials/SEI_Diffusion_Model.xml"/> 
+  
+         <geom_object>
+           <intersection>
+             <include href="./Geometry/SEI_Blank.xml"/>
+             <union>
+               <include href="./Geometry/Voronoi_4.xml"/>
+             </union>
+           </intersection>
+           <color> 4 </color>
+           <res>[2,2,2]</res>
+           <velocity>[0.0,0.0,0.0]</velocity>
+           <temperature>0</temperature>
+           <concentration> 0 </concentration>
+         </geom_object>
+       </material>
+
+       <material name="sei_5">
+         <density>2.11e22</density>
+         <melt_temp> 2000.0 </melt_temp>
+         <do_conc_reduction> false </do_conc_reduction>
+         <thermal_conductivity>0.0</thermal_conductivity>
+         <specific_heat>5</specific_heat>
+
+         <include href="./Materials/SEI_Constitutive_Plastic_ZeroStress.xml"/>
+         <include href="./Materials/SEI_Diffusion_Model.xml"/> 
+  
+         <geom_object>
+           <intersection>
+             <include href="./Geometry/SEI_Blank.xml"/>
+             <union>
+               <include href="./Geometry/Voronoi_5.xml"/>
+             </union>
+           </intersection>
+           <color> 5 </color>
+           <res>[2,2,2]</res>
+           <velocity>[0.0,0.0,0.0]</velocity>
+           <temperature>0</temperature>
+           <concentration> 0 </concentration>
+         </geom_object>
+       </material>
+       
+       <material name="sei_6">
+         <density>2.11e22</density>
+         <melt_temp> 2000.0 </melt_temp>
+         <do_conc_reduction> false </do_conc_reduction>
+         <thermal_conductivity>0.0</thermal_conductivity>
+         <specific_heat>5</specific_heat>
+
+         <include href="./Materials/SEI_Constitutive_Plastic_ZeroStress.xml"/>
+         <include href="./Materials/SEI_Diffusion_Model.xml"/> 
+  
+         <geom_object>
+           <intersection>
+             <include href="./Geometry/SEI_Blank.xml"/>
+             <union>
+               <include href="./Geometry/Voronoi_6.xml"/>
+             </union>
+           </intersection>
+           <color> 6 </color>
+           <res>[2,2,2]</res>
+           <velocity>[0.0,0.0,0.0]</velocity>
+           <temperature>0</temperature>
+           <concentration> 0 </concentration>
+         </geom_object>
+       </material>
+
+       <material name="sei_7">
+         <density>2.11e22</density>
+         <melt_temp> 2000.0 </melt_temp>
+         <do_conc_reduction> false </do_conc_reduction>
+         <thermal_conductivity>0.0</thermal_conductivity>
+         <specific_heat>5</specific_heat>
+
+         <include href="./Materials/SEI_Constitutive_Plastic_ZeroStress.xml"/>
+         <include href="./Materials/SEI_Diffusion_Model.xml"/> 
+  
+         <geom_object>
+           <intersection>
+             <include href="./Geometry/SEI_Blank.xml"/>
+             <union>
+               <include href="./Geometry/Voronoi_7.xml"/>
+             </union>
+           </intersection>
+           <color> 7 </color>
+           <res>[2,2,2]</res>
+           <velocity>[0.0,0.0,0.0]</velocity>
+           <temperature>0</temperature>
+           <concentration> 0 </concentration>
+         </geom_object>
+       </material>
+
+       <contact>
+         <type>single_velocity</type>
+         <materials> [0,1,2,3,4,5,6,7,8,9]</materials>
+       </contact>
+
+       <diffusion_interface>
+         <type>null</type>
+       </diffusion_interface>
+     </MPM>
+   </MaterialProperties>
+
+   <PhysicalBC>
+     <MPM>
+       <scalar_flux>
+         <geom_object>
+           <cylinder label = "side">
+             <bottom>       [0.0,0.0,0.1]    </bottom>
+             <top>          [0.0,0.0,0.15]    </top>
+             <radius>       0.2505            </radius>
+           </cylinder>
+         </geom_object>
+         <load_curve>
+           <id>1</id>
+           <time_point>
+             <time> 0 </time>
+             <load> 0.6e-10 </load> <!-- 2C ? -->
+           </time_point>
+           <time_point>
+             <time> 8.0e10 </time>
+             <load> 0.6e-10 </load> <!-- 2C ? -->
+           </time_point>
+         </load_curve>
+       </scalar_flux>
+       <scalar_flux>
+         <geom_object>
+           <cylinder label = "top">
+             <bottom>           [0.0,0.0,.1505]  </bottom>
+             <top>              [0.0,0.0,.1530]  </top>
+             <radius>           0.2505              </radius>
+             <cylinder_end>true</cylinder_end>
+           </cylinder>
+         </geom_object>
+         <load_curve>
+           <id>2</id>
+           <time_point>
+             <time> 0 </time>
+             <load> 0.6e-10 </load> <!-- 2C ? -->
+           </time_point>
+           <time_point>
+             <time> 8.0e10 </time>
+             <load> 0.6e-10 </load> <!-- 2C ? -->
+           </time_point>
+         </load_curve>
+       </scalar_flux>
+     </MPM>
+   </PhysicalBC>
+
+   <Grid>
+     <Level>
+       <Box label = "1">
+         <lower>        [0.00 ,0.00, 0.00]      </lower>
+         <upper>        [0.50 ,0.50, 0.40]      </upper>
+         <resolution>   [50, 50, 40 ]      </resolution>
+         <patches>      [2,2,1]            </patches>
+         <extraCells>   [1,1,1]            </extraCells>
+       </Box>
+     </Level>
+     <BoundaryConditions>
+      <Face side = "x-">
+        <BCType id = "all" label = "Symmetric" var = "symmetry"> </BCType>
+      </Face>
+      <Face side = "x+">
+        <BCType id = "all" label = "Symmetric" var = "symmetry"> </BCType>
+      </Face>
+      <Face side = "y-">
+        <BCType id = "all" label = "Symmetric" var = "symmetry"> </BCType>
+      </Face>                  
+      <Face side = "y+">
+        <BCType id = "all" label = "Symmetric" var = "symmetry"> </BCType>
+      </Face>
+      <Face side = "z-">
+        <BCType id = "all" label = "Symmetric" var = "symmetry"> </BCType>
+        <BCType id = "all" label = "Velocity"     var = "Dirichlet">
+                              <value> [0.,0.,0.] </value>
+        </BCType>
+      </Face>                  
+      <Face side = "z+">
+        <BCType id = "all" label = "Symmetric" var = "symmetry"> </BCType>
+      </Face>
+     </BoundaryConditions>
+   </Grid>
+</Uintah_specification>

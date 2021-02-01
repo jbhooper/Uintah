@@ -1,0 +1,52 @@
+<?xml version='1.0' encoding='ISO-8859-1' ?>
+<!-- Li2CO3 Constitutive Model for Voronoi System. -->
+<Uintah_Include>
+         <constitutive_model type="elastic_plastic_hp"> 
+           <bulk_modulus>            50.5e6    </bulk_modulus>
+           <shear_modulus>          22.2e6    </shear_modulus>
+           <evolve_porosity>true</evolve_porosity>
+           <do_melting>false</do_melting>
+           <useModifiedEOS>true</useModifiedEOS>
+           <check_TEPLA_failure_criterion>true</check_TEPLA_failure_criterion>
+           <check_max_stress_failure>false</check_max_stress_failure>
+     <critical_stress>12.9e9</critical_stress>
+
+           <!-- Temperature is not currently used in this model, -->
+           <!-- Keep initial material Temperature set to 298.0 -->
+           <initial_material_temperature> 298.0 </initial_material_temperature>
+           <taylor_quinney_coeff>    0.9     </taylor_quinney_coeff>
+           <plastic_convergence_algo>radialReturn</plastic_convergence_algo>
+
+           <!-- Shear Modulus Model type added for clarity -->
+           <!-- Does not need to be added because this is the default value -->
+           <shear_modulus_model type = "constant_shear">
+           </shear_modulus_model>
+
+           <!-- Deviatoric Stress Model type added for clarity -->
+           <!-- Does not need to be added because this is the default value -->
+           <deviatoric_stress_model type="hypoElastic">
+           </deviatoric_stress_model>
+
+           <!-- Equation of State type added for clarity -->
+           <!-- Does not need to be added because this is the default value -->
+           <equation_of_state type = "default_hypo">
+           </equation_of_state>
+
+           <flow_model type = "isotropic_hardening">
+       <sigma_Y> 581.0e3</sigma_Y>  <!-- 581 MPa -->
+       <K> 2.905e6</K> <!-- 2.9 GPa -->
+           </flow_model>
+
+           <yield_condition type = "vonMises">
+           </yield_condition>
+     
+     <initial_mean_porosity>         0.00 </initial_mean_porosity>
+           <initial_std_porosity>          0.00 </initial_std_porosity>
+           <critical_porosity>             0.3   </critical_porosity>
+           <frac_nucleation>               0.1   </frac_nucleation>
+           <meanstrain_nucleation>         0.3   </meanstrain_nucleation>
+           <stddevstrain_nucleation>       0.1   </stddevstrain_nucleation>
+           <initial_porosity_distrib>      constant </initial_porosity_distrib>
+   </constitutive_model>
+   <erosion algorithm="ZeroStress"/>
+</Uintah_Include>

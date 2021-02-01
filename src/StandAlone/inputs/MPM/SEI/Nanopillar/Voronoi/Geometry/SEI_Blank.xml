@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='ISO-8859-1' ?>
+<!-- Dimensions for cylindrical SEI layer. -->
+<Uintah_Include>
+    <difference>
+      <cylinder>
+        <bottom> [0.00, 0.00, 0.10] </bottom>
+        <top>  [0.00, 0.00, 0.20] </top>
+        <radius> 0.30 </radius>
+      </cylinder>
+      <cylinder>
+        <bottom> [0.00, 0.00, 0.10] </bottom>
+        <top>    [0.00, 0.00, 0.15] </top>
+        <radius> 0.25 </radius>
+      </cylinder>
+    </difference>
+</Uintah_Include>

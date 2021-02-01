@@ -1,0 +1,41 @@
+<?xml version='1.0' encoding='ISO-8859-1' ?>
+<!-- Set of unconnected voronoi cells. -->
+<Uintah_Include>
+         <constitutive_model type="elastic_plastic_hp"> 
+           <bulk_modulus>            180.4e6    </bulk_modulus>
+           <shear_modulus>           76.0e6    </shear_modulus>
+           <!--
+           <volume_expansion_coeff>  0.56     </volume_expansion_coeff>
+           -->
+           <!-- Temperature is not currently used in this model, -->
+           <!-- Keep initial material Temperature set to 298.0 -->
+           <initial_material_temperature> 298.0 </initial_material_temperature>
+           <taylor_quinney_coeff>    0.9     </taylor_quinney_coeff>
+           <plastic_convergence_algo>radialReturn</plastic_convergence_algo>
+
+           <!-- Shear Modulus Model type added for clarity -->
+           <!-- Does not need to be added because this is the default value -->
+           <shear_modulus_model type = "constant_shear">
+           </shear_modulus_model>
+
+           <!-- Deviatoric Stress Model type added for clarity -->
+           <!-- Does not need to be added because this is the default value -->
+           <deviatoric_stress_model type="hypoElastic">
+           </deviatoric_stress_model>
+
+           <!-- Equation of State type added for clarity -->
+           <!-- Does not need to be added because this is the default value -->
+           <equation_of_state type = "default_hypo">
+           </equation_of_state>
+
+           <flow_model type = "isotropic_hardening">
+             <sigma_Y> 0.7e6</sigma_Y>
+             <K> 1.15e6</K>
+           </flow_model>
+
+           <stability_check type="drucker">
+           </stability_check>
+           <yield_condition type = "vonMises">
+           </yield_condition>
+         </constitutive_model>
+</Uintah_Include>

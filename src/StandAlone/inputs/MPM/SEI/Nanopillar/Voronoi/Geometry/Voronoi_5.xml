@@ -1,0 +1,632 @@
+<?xml version='1.0' encoding='ISO-8859-1' ?>
+<!-- Set of unconnected voronoi cells. -->
+<Uintah_Include>
+  <polyhedron label = "5.0_46">
+    <center> [ 0.22587083899186416, 0.20401727087953542, 0.1704305750094278] </center>
+    <bounds>
+      <half_space type = "absolute">
+        <planePoint>[ 0.22366826602681422, 0.17754123176984804, 0.20584409946085877] </planePoint>
+        <normal>[ 0.04289289778471404, 0.19525831666621118, -0.9798134460662946] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.18699815030222364, 0.2018998754428352, 0.1694330875368824] </planePoint>
+        <normal>[ 0.8682765641873658, -0.3642024781093114, 0.3368269036493667] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.2138491570652043, 0.17279261085609124, 0.15501834778399393] </planePoint>
+        <normal>[ 0.15978543789136226, 0.921142573609616, 0.3549154447494767] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.2181836972229581, 0.22236404016197522, 0.1956293907704344] </planePoint>
+        <normal>[ 0.045313222415421656, -0.48314932599873656, -0.8743645925249359] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.24074792062893946, 0.16152584628581665, 0.19812441240136083] </planePoint>
+        <normal>[ -0.2446418896034369, 0.6587591557403099, -0.7114680039043033] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.23207632129142058, 0.2507328906880434, 0.16435150217115913] </planePoint>
+        <normal>[ 0.3147513547687305, -0.9319357857647138, -0.1800757504006419] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.262382049404142, 0.25278026515352475, 0.17873813974655425] </planePoint>
+        <normal>[ -0.5304094869708126, -0.7731958685453733, -0.3476117446170731] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.26528725575891704, 0.21552638943362082, 0.14508997956822656] </planePoint>
+        <normal>[ -0.7245318347892024, -0.20202333586430563, 0.658969037317574] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.18955300050159776, 0.18481733609923373, 0.2004361492844324] </planePoint>
+        <normal>[ 0.37371148417519573, 0.5611679506063204, -0.7385325028784276] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.21502834442495403, 0.1645765659386103, 0.1901702168624234] </planePoint>
+        <normal>[ 0.3027133406823594, 0.9376933982157738, -0.17057468837866968] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.23824542864965065, 0.2524239995437938, 0.14580483715257347] </planePoint>
+        <normal>[ -0.011117934270380487, -0.8106294838260506, 0.5854538679430433] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.263633939518503, 0.20364239357281974, 0.1819615759169713] </planePoint>
+        <normal>[ -0.7116484213582994, 0.03166415643085773, -0.7018218474625613] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.22789202857571145, 0.22072446460135783, 0.1310722075775441] </planePoint>
+        <normal>[ 0.1641238243848102, -0.3991306522898665, 0.9020854131799104] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.19972483056114204, 0.18828120765109674, 0.1363642101597638] </planePoint>
+        <normal>[ 0.7171715130301924, 0.21372360791609968, 0.6633153400286396] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.2567096081007027, 0.18333291752833736, 0.1457183396714693] </planePoint>
+        <normal>[ -0.35893445554314374, 0.7493860966043454, 0.5564050097186847] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.25426127105941915, 0.16296263372117312, 0.18138032088291833] </planePoint>
+        <normal>[ -0.6007623252955949, 0.7994213699912918, -0.003178318215053433] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.2578026334172019, 0.24776103338614736, 0.15806937218445016] </planePoint>
+        <normal>[ -0.5975344299315848, -0.7015578947718376, 0.38829000158340815] </normal>
+      </half_space>
+    </bounds>
+  </polyhedron>
+  <polyhedron label = "5.1_54">
+    <center> [ 0.15969112822265188, 0.14130310472054075, 0.29263928564527386] </center>
+    <bounds>
+      <half_space type = "absolute">
+        <planePoint>[ 0.20805425408968742, 0.12105287541054173, 0.29725864125667056] </planePoint>
+        <normal>[ -0.756048343095448, 0.6504199628466717, -0.07310796696094099] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.19611826766387275, 0.17172638090410292, 0.2800135676748171] </planePoint>
+        <normal>[ -0.6865658865807366, -0.5201684233797992, 0.507988282052038] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.1338542843993676, 0.12375977584483089, 0.2846324359925759] </planePoint>
+        <normal>[ 0.7485520513085272, 0.6630562703358965, 0.005119457983665368] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.18689112405812147, 0.1584319587724887, 0.269625568420637] </planePoint>
+        <normal>[ -0.49206669417715565, -0.20192750376879137, 0.8468150044155277] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.12196522032917276, 0.1466157953649544, 0.2924533070320058] </planePoint>
+        <normal>[ 0.9906137658186, -0.036186353525526786, 0.13181394004132418] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.20418353673884748, 0.15071258448930241, 0.2884870310021602] </planePoint>
+        <normal>[ -0.9606342607627998, -0.22957361685779484, 0.15645373594625184] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.16391119113703667, 0.14252799143315106, 0.3] </planePoint>
+        <normal>[ -0.0, -0.0, -1.0] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.1422204750151922, 0.15333205072709638, 0.2761604973456101] </planePoint>
+        <normal>[ 0.5155895766246844, -0.49025683928613095, 0.7027201576795357] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.17991543668462404, 0.17564639323335085, 0.2855488602985307] </planePoint>
+        <normal>[ -0.055684998466096106, -0.9898330534740737, 0.1308805073187855] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.178765567013261, 0.12275686680654871, 0.2800562565405825] </planePoint>
+        <normal>[ -0.2579219111760993, 0.7277419893805188, 0.6355060067597733] </normal>
+      </half_space>
+    </bounds>
+  </polyhedron>
+  <polyhedron label = "5.2_59">
+    <center> [ 0.00893779776352327, 0.172533494923889, 0.2352313005578378] </center>
+    <bounds>
+      <half_space type = "absolute">
+        <planePoint>[ 0.04663850929416484, 0.1708383566324906, 0.2156266568206231] </planePoint>
+        <normal>[ -0.6770909429269194, 0.17528605010383466, 0.7147185849306922] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.020787274083533112, 0.14904529302944325, 0.23920982743498695] </planePoint>
+        <normal>[ -0.017260675623440334, 0.9991310411552826, -0.03793720702665367] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.02257345548033768, 0.1884882079331034, 0.20867831236268997] </planePoint>
+        <normal>[ 0.08742302143512277, -0.314488592308986, 0.9452270312632126] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.023641628751291447, 0.18380766360022488, 0.2493778517259745] </planePoint>
+        <normal>[ -0.42773848815294074, -0.2422471445220577, -0.8708364408564595] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.015887806006651194, 0.21322896149732, 0.2308137103576896] </planePoint>
+        <normal>[ 0.07522207045228455, -0.9861001943530472, 0.14814873206934323] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.028197598958858504, 0.2110993700936497, 0.2344373207759767] </planePoint>
+        <normal>[ -0.3938214043783443, -0.8566456044630294, -0.3332611735675783] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.04991285361694582, 0.15718657120548474, 0.2339485837688678] </planePoint>
+        <normal>[ -0.7547255073809491, 0.584314885502, -0.29827088877286323] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.045214985517214784, 0.1922055901133727, 0.2238072706042925] </planePoint>
+        <normal>[ -0.9224834835858988, -0.37279328853291105, 0.10024662855199974] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.02635336711418016, 0.15614615835681897, 0.21225403571457485] </planePoint>
+        <normal>[ -0.3475935616201627, 0.587723270368722, 0.7305888538619407] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.0, 0.17570738730101515, 0.22945192920160684] </planePoint>
+        <normal>[ 1.0, 0.0, -0.0] </normal>
+      </half_space>
+    </bounds>
+  </polyhedron>
+  <polyhedron label = "5.3_61">
+    <center> [ 0.12838408382667044, 0.23641812786675506, 0.2744395129194188] </center>
+    <bounds>
+      <half_space type = "absolute">
+        <planePoint>[ 0.0779209243886115, 0.24726655496792818, 0.2943381133509603] </planePoint>
+        <normal>[ 0.909875607052107, -0.41356627291665116, 0.03300481173086427] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.1434337120579659, 0.25594421241644466, 0.2730974046063837] </planePoint>
+        <normal>[ -0.6728615466687646, -0.7329422349172919, -0.10026474599261107] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.0954681298471613, 0.22454699315988713, 0.254435589529951] </planePoint>
+        <normal>[ 0.6136747669996679, 0.45995365497331825, 0.6417522229214239] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.08762867815377666, 0.21806108766993565, 0.2839049849139036] </planePoint>
+        <normal>[ 0.8830111436832353, 0.46586930964891554, -0.057071064984523516] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.12549041993427645, 0.24969227474499114, 0.2316628003186485] </planePoint>
+        <normal>[ -0.03525035665161938, -0.1266219516350726, 0.9913245148386369] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.11607838367110952, 0.25624661039470276, 0.23828331556035098] </planePoint>
+        <normal>[ 0.40194962439406895, -0.6274259670417789, 0.666913154264598] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.10194746182031457, 0.2582549583938412, 0.26851702712519515] </planePoint>
+        <normal>[ 0.4651959628173831, -0.8767459820300704, 0.12210323162199832] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.07949942520434244, 0.24140501286588614, 0.27664113963432746] </planePoint>
+        <normal>[ 0.9881698258406266, -0.015534671466510282, 0.1525747989693355] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.10027545987340482, 0.24490577637955827, 0.24274132169203935] </planePoint>
+        <normal>[ 0.5964354047444689, -0.09044456233300027, 0.7975491139181923] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.14306403834537218, 0.25222124018959935, 0.23931811067993616] </planePoint>
+        <normal>[ -0.43015242670084325, -0.6759167859080133, 0.5984190741705655] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.1037281616328126, 0.23478660137190094, 0.3] </planePoint>
+        <normal>[ -0.0, 0.0, -1.0] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.11490903169397595, 0.20564177537396097, 0.27179408922433423] </planePoint>
+        <normal>[ -0.028158513860886386, 0.9510556148454732, 0.3077341637973354] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.13238851330492807, 0.23199454754946372, 0.2374024581563852] </planePoint>
+        <normal>[ 0.001477430954708813, 0.3819521745532685, 0.9241809095365493] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.151218115361146, 0.22541360052770276, 0.2642849109871805] </planePoint>
+        <normal>[ -0.7670948989495772, 0.6084449369849506, -0.20337201051992726] </normal>
+      </half_space>
+    </bounds>
+  </polyhedron>
+  <polyhedron label = "5.4_66">
+    <center> [ 0.16074564828943286, 0.10219909420615554, 0.21333465976856886] </center>
+    <bounds>
+      <half_space type = "absolute">
+        <planePoint>[ 0.13674536121616865, 0.12372191035454808, 0.19722904090024387] </planePoint>
+        <normal>[ 0.49213469601439663, -0.5264925948551521, 0.6932596833377132] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.16312461793417135, 0.08078988431396994, 0.17932894474556363] </planePoint>
+        <normal>[ -0.3675436056104072, 0.2725146564334263, 0.8891835918435927] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.14001057480295998, 0.053784765988293154, 0.20241639712636295] </planePoint>
+        <normal>[ 0.41367507418558697, 0.8647013817265898, 0.28489375815850265] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.19554996975431496, 0.07898345667953167, 0.20693977381492218] </planePoint>
+        <normal>[ -0.9085699577890743, 0.27562965176340404, 0.31389317748550133] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.14793489249287628, 0.06133958214047649, 0.18155625220267516] </planePoint>
+        <normal>[ 0.23637050436266074, 0.5577451405820313, 0.7956439799461009] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.11082896032182496, 0.08034337731528735, 0.23717228436710164] </planePoint>
+        <normal>[ 0.8823685142882978, 0.46683792599982704, -0.059060611585406736] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.16020306273229762, 0.06830243226070257, 0.24316592071442386] </planePoint>
+        <normal>[ -0.23497189875397656, 0.44193227153146597, -0.8657274826265998] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.11809994746125277, 0.08898460596268185, 0.24902667377631996] </planePoint>
+        <normal>[ 0.47446885566265035, -0.025551222061453972, -0.8799013808702321] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.20018495209779377, 0.08803661555916445, 0.22988070855032622] </planePoint>
+        <normal>[ -0.8741471609048698, 0.2882924572861677, -0.3908378182236962] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.1782319858637486, 0.13231097694214464, 0.22222858904974055] </planePoint>
+        <normal>[ -0.4952165774092453, -0.8048833674722242, -0.3269912938071065] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.1868509352718731, 0.11322567873491861, 0.2022340618415322] </planePoint>
+        <normal>[ -0.7285717147349186, -0.4419943372565729, 0.5232822014184538] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.12490704323214544, 0.07878606347597521, 0.20326506246905496] </planePoint>
+        <normal>[ 0.8201474961704125, 0.3740986919385662, 0.43290674886776365] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.10288671917275405, 0.10823976369340277, 0.23125059657540842] </planePoint>
+        <normal>[ 0.8737749768473233, -0.23073421813379166, -0.4281109790902907] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.1685082461003154, 0.05710040104802747, 0.20996241314996617] </planePoint>
+        <normal>[ -0.228100293784556, 0.9725898594679776, 0.04515773727124424] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.12990209415539106, 0.12658611450564936, 0.23262953598795058] </planePoint>
+        <normal>[ 0.36412116661796484, -0.8030346473125711, -0.47175325249154004] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.1321945854751797, 0.059775027307612374, 0.23392163969343296] </planePoint>
+        <normal>[ 0.16948213507713553, 0.86820261705068, -0.46636897585071607] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.16218032276790884, 0.1025817923484481, 0.24421834173508833] </planePoint>
+        <normal>[ -0.20889275363510737, -0.11066955579906158, -0.9716563522655428] </normal>
+      </half_space>
+    </bounds>
+  </polyhedron>
+  <polyhedron label = "5.5_67">
+    <center> [ 0.04715824498406402, 0.2181316953005598, 0.11510666763065412] </center>
+    <bounds>
+      <half_space type = "absolute">
+        <planePoint>[ 0.05341853454969703, 0.19098191285503, 0.14620910320159136] </planePoint>
+        <normal>[ -0.2535027254365055, 0.7092794456829887, -0.6577682237140191] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.009952961557798725, 0.20943844239117784, 0.1423751366909124] </planePoint>
+        <normal>[ 0.5224457268802931, 0.3295863112278053, -0.7863989610342644] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.07105255661449338, 0.21678179644413, 0.12679291560877967] </planePoint>
+        <normal>[ -0.7375857750192537, -0.2617926142795658, -0.6224402393787836] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.057823602664598496, 0.18683874962264088, 0.11932661149406482] </planePoint>
+        <normal>[ -0.47038497048371436, 0.8760225040262989, 0.10640748085791957] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.016542832240804207, 0.24521480894488396, 0.1175367305903531] </planePoint>
+        <normal>[ 0.48554553748365453, -0.8718893327588567, 0.06367513212412546] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.05046453511314795, 0.24834070630524419, 0.1184827620963502] </planePoint>
+        <normal>[ -0.3072955751802398, -0.9291353380450759, -0.20561360137526963] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.029110716493501464, 0.22123663705701269, 0.14451228191564502] </planePoint>
+        <normal>[ 0.10847924273604731, -0.3063924056149717, -0.9457039429318693] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.026425067771214235, 0.19094576708987615, 0.13378214508563596] </planePoint>
+        <normal>[ 0.4417074658022845, 0.7664512557852203, -0.4663121134602688] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.01879411829894389, 0.1829062072324651, 0.10648203419297793] </planePoint>
+        <normal>[ 0.28731104154024617, 0.9564746069696985, 0.05107535248257853] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.04278587020122661, 0.21808969125248615, 0.09999999999999999] </planePoint>
+        <normal>[ 5.2567912221943494e-17, 3.3708295650673163e-16, 1.0] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.0, 0.21302303459331295, 0.11941317766633522] </planePoint>
+        <normal>[ 1.0, -0.0, -0.0] </normal>
+      </half_space>
+    </bounds>
+  </polyhedron>
+  <polyhedron label = "5.6_85">
+    <center> [ 0.28123589668681964, 0.09274705609580262, 0.21977842422709876] </center>
+    <bounds>
+      <half_space type = "absolute">
+        <planePoint>[ 0.2823774551106405, 0.07624391359421151, 0.2033433570401121] </planePoint>
+        <normal>[ -0.2168628261614574, 0.6896086780051518, 0.6909489024879139] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.25736877541822845, 0.08695204512254873, 0.20800916179493145] </planePoint>
+        <normal>[ 0.8472540707299077, 0.18806064444213838, 0.4967833870447041] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.27801923023916086, 0.06586993020534537, 0.22816377480617175] </planePoint>
+        <normal>[ -0.09233006415436183, 0.913082258015962, -0.397185031628489] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.26309864333962707, 0.12075764356435614, 0.22272454126717656] </planePoint>
+        <normal>[ 0.5244172556222896, -0.8268781758271279, -0.20312317530598953] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.25741710211219976, 0.08817628443431462, 0.22893619419565822] </planePoint>
+        <normal>[ 0.8439701020873854, 0.26162329631670617, -0.4682603096643887] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.29079856770665474, 0.12939041631996356, 0.22757999128830847] </planePoint>
+        <normal>[ -0.15715617354854095, -0.8558158638785182, -0.49282973149907117] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.28060691361356455, 0.10160995935784263, 0.24026078879504809] </planePoint>
+        <normal>[ 0.0857702726614535, -0.16050697466079716, -0.9833010583808085] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.2814903373186349, 0.11406526353579574, 0.20361840749221571] </planePoint>
+        <normal>[ -0.08113623944248818, -0.5362691772493627, 0.8401382506358241] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.30000000000000004, 0.09767732582907318, 0.2230080800697056] </planePoint>
+        <normal>[ -1.0, -4.626329141713119e-16, -2.834191069315297e-15] </normal>
+      </half_space>
+    </bounds>
+  </polyhedron>
+  <polyhedron label = "5.7_86">
+    <center> [ 0.24286078982474626, 0.11029894175902057, 0.15579749927577713] </center>
+    <bounds>
+      <half_space type = "absolute">
+        <planePoint>[ 0.2706943900272224, 0.0787739453383043, 0.15839630678510358] </planePoint>
+        <normal>[ -0.6338534117768716, 0.6350696085295495, -0.4414934254334309] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.24798585969200607, 0.09484810832312965, 0.1725756547644146] </planePoint>
+        <normal>[ 0.2847118379714821, 0.6249597442699558, -0.7268868463254318] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.22369159230941107, 0.10240250287211702, 0.14107631223073852] </planePoint>
+        <normal>[ 0.8481656357182648, 0.4818049792386574, 0.22017950941781259] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.25010666735147036, 0.07888594149376706, 0.14507970353517716] </planePoint>
+        <normal>[ 0.17446495738440498, 0.962352180129534, 0.20842327136092673] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.26722399026251253, 0.0747711251650995, 0.1551561307643311] </planePoint>
+        <normal>[ -0.30066212593952796, 0.9479923913455242, -0.10446392667575653] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.2318556385552774, 0.13123784802678612, 0.15619101332907723] </planePoint>
+        <normal>[ 0.5894675318592839, -0.7908255165613726, 0.16469071388260556] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.24137727222519334, 0.09587405847564545, 0.12394479049260745] </planePoint>
+        <normal>[ 0.3246236705302355, 0.5114507581866344, 0.7956365969975199] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.24604913000532097, 0.12510547074353762, 0.19652818960722207] </planePoint>
+        <normal>[ -0.05274011863267347, -0.42125598676290443, -0.9054070209044235] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.2675196692527463, 0.08638727218852318, 0.1361760887988868] </planePoint>
+        <normal>[ -0.4271875848346596, 0.6405705862971253, 0.638106645737284] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.23313360902281374, 0.1232501697622384, 0.17905061999475855] </planePoint>
+        <normal>[ 0.786368499165051, -0.3039184310957499, -0.5378272685176932] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.25827397604391283, 0.11603877781479371, 0.1702291091322179] </planePoint>
+        <normal>[ -0.9046444674884911, -0.28841944565138994, -0.3137397182579998] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.2453763351603367, 0.1168282383858456, 0.1294349809550802] </planePoint>
+        <normal>[ -0.2214990945053121, -0.7749087576501288, 0.5919920341106463] </normal>
+      </half_space>
+    </bounds>
+  </polyhedron>
+  <polyhedron label = "5.8_89">
+    <center> [ 0.02981692624700518, 0.09753147438945907, 0.17945773482383187] </center>
+    <bounds>
+      <half_space type = "absolute">
+        <planePoint>[ 0.06396672291725955, 0.09787315733030207, 0.1478047655199169] </planePoint>
+        <normal>[ -0.8023986351247361, 0.06691863631186296, 0.5930247266886275] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.058026619217339905, 0.08437487977592484, 0.20195254956906916] </planePoint>
+        <normal>[ -0.529366244028136, 0.6316753102567743, -0.5663547316793176] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.060340876854875894, 0.11866660540254406, 0.17060782733262547] </planePoint>
+        <normal>[ -0.5473140626264436, -0.8300982986128225, 0.1066964455426465] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.03110843199386574, 0.0987029244375191, 0.20951535799982166] </planePoint>
+        <normal>[ 0.31439200965457204, -0.23326503861029155, -0.9201875276417839] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.02366982440308748, 0.10684055554743357, 0.1433945341646592] </planePoint>
+        <normal>[ 0.19435882838374013, 0.0752477698010916, 0.9780400906758688] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.059668981076778316, 0.07164520647291175, 0.1677699788698744] </planePoint>
+        <normal>[ -0.7027112914243544, 0.6915841695224145, 0.16705740741047106] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.07663976986657153, 0.09867906026741767, 0.1871220850301907] </planePoint>
+        <normal>[ -0.958003477527177, 0.28324261446769267, -0.04475442319304123] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.024245746213662846, 0.07043712096739452, 0.18385899846248438] </planePoint>
+        <normal>[ 0.4874914512276007, 0.8688533056627451, -0.08629031358691581] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.07202938653953794, 0.11044844168873716, 0.21343333664241138] </planePoint>
+        <normal>[ -0.41431317931665046, -0.31384939902137804, -0.8543085766738204] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.03216067008307299, 0.07716557312943016, 0.15078307825871534] </planePoint>
+        <normal>[ 0.1664497608210106, 0.676180657296821, 0.7176866975360958] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.015358205055781858, 0.1284112876657729, 0.15017453876682285] </planePoint>
+        <normal>[ 0.1815455196254441, -0.8888224673493145, 0.42075627843087976] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.03889973094386259, 0.1220582216774777, 0.1415445690079205] </planePoint>
+        <normal>[ 0.06766030012978759, -0.5435582985622658, 0.8366399822208127] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.03460762814697273, 0.1216103446183082, 0.18637997358653952] </planePoint>
+        <normal>[ 0.008548938185893827, -0.9540992967267794, -0.2993684145686696] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.0, 0.10426954672833044, 0.16774019113099917] </planePoint>
+        <normal>[ 1.0, 0.0, -0.0] </normal>
+      </half_space>
+    </bounds>
+  </polyhedron>
+  <polyhedron label = "5.9_91">
+    <center> [ 0.0012212800298584403, 0.005542380594800711, 0.2074893525514134] </center>
+    <bounds>
+      <half_space type = "absolute">
+        <planePoint>[ 0.031025795830051692, 0.03974741306907516, 0.21619259833360588] </planePoint>
+        <normal>[ -0.8047825309241887, -0.5750052717446011, -0.1472888841195236] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.028244733095080705, 0.019060399652743257, 0.19115890675287522] </planePoint>
+        <normal>[ -0.7673650204872852, -0.30867324355190084, 0.5620246916708351] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.013749997295020779, 0.02799850651008623, 0.23854395291810607] </planePoint>
+        <normal>[ -0.20318952075735747, -0.6018000220446423, -0.7723669802117795] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.03256961878458678, 0.01754873149907923, 0.22579975197230645] </planePoint>
+        <normal>[ -0.8473081463392084, -0.1504523449732988, -0.5093456557577086] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.012740397264605026, 0.03801111183641005, 0.19653167308403596] </planePoint>
+        <normal>[ -0.10433701663118662, -0.9018308115021528, 0.4193029625293289] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.00587931977303274, 0.012314217623602207, 0.16445827906424215] </planePoint>
+        <normal>[ -0.06960250600838638, -0.09710767207589137, 0.9928371423256452] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.0, 0.019239979192969374, 0.20388948236788984] </planePoint>
+        <normal>[ 1.0, 0.0, 0.0] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.01566927600546097, 0.0, 0.21147651096331932] </planePoint>
+        <normal>[ 0.0, 1.0, -0.0] </normal>
+      </half_space>
+    </bounds>
+  </polyhedron>
+  <polyhedron label = "5.10_92">
+    <center> [ 0.2607639151079416, 0.2199105030313919, 0.29615340430810516] </center>
+    <bounds>
+      <half_space type = "absolute">
+        <planePoint>[ 0.20665556059361326, 0.24248003955867625, 0.2834094221402073] </planePoint>
+        <normal>[ 0.8589079171900996, -0.4909872395074284, 0.14563214078300138] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.23324984266851936, 0.21461462423211145, 0.2675013326741537] </planePoint>
+        <normal>[ 0.54457652300975, 0.44153790168081125, 0.7130783210601187] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.25958223861708124, 0.24588888935375672, 0.2740271071606517] </planePoint>
+        <normal>[ -0.055546346890137335, -0.9055503959477176, 0.420586594824529] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.227816631443847, 0.23813739808761866, 0.2616622878982667] </planePoint>
+        <normal>[ 0.4417644848533661, -0.14146631032992746, 0.8859071187003053] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.21464485833649788, 0.25032425388566326, 0.2855564501342296] </planePoint>
+        <normal>[ 0.49258216551505307, -0.8647056106523379, 0.09821922990366258] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.2810934499246857, 0.19370457582631284, 0.27431518443936737] </planePoint>
+        <normal>[ -0.4532330464807289, 0.7534374528610261, 0.4763526112073769] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.2745976001027873, 0.22038016720577694, 0.2519737737468725] </planePoint>
+        <normal>[ -0.15424365332225326, 0.21995931249253925, 0.9632376634339077] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.23920292070211907, 0.19088822234848418, 0.2889411090640327] </planePoint>
+        <normal>[ 0.27514453391195526, 0.9228292306631233, 0.2695954311409618] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.24626612981260138, 0.22354966231603632, 0.3] </planePoint>
+        <normal>[ 0.0, 0.0, -1.0] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.3, 0.22348984129807245, 0.2775133775842459] </planePoint>
+        <normal>[ -1.0, 0.0, 0.0] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.20604055330693488, 0.21843371809123038, 0.29266175293055957] </planePoint>
+        <normal>[ 0.9854120375777277, 0.11472645552623481, 0.12570185598986972] </normal>
+      </half_space>
+    </bounds>
+  </polyhedron>
+  <polyhedron label = "5.11_94">
+    <center> [ 0.10355700566079996, 0.03441445639066286, 0.10263895702354163] </center>
+    <bounds>
+      <half_space type = "absolute">
+        <planePoint>[ 0.08960141637392063, 0.0606494963402417, 0.11407745347105241] </planePoint>
+        <normal>[ -0.010854293345754065, -0.933610112325851, -0.3581261544189088] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.12000411487006422, 0.036844943871471525, 0.12066655817409389] </planePoint>
+        <normal>[ -0.6845513496928832, -0.2771145809444369, -0.6742380578561559] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.05829830652094092, 0.05229424207523328, 0.1103867498440599] </planePoint>
+        <normal>[ 0.8358954001820094, -0.5468736218325202, -0.046990655436375914] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.0776559839008028, 0.047837912537554324, 0.12815113615780768] </planePoint>
+        <normal>[ 0.287619429332677, -0.14293761520997628, -0.9470184275020366] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.08832725453760444, 0.023055885299959458, 0.11674441085709626] </planePoint>
+        <normal>[ 0.5005134656669809, 0.7301661352040154, -0.4651276015108752] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.05726243972261483, 0.04831507370805355, 0.11749425171096903] </planePoint>
+        <normal>[ 0.8971998168157893, -0.2461345940831424, -0.3666745836586453] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.12860658735418456, 0.009945400576140009, 0.11169999936727207] </planePoint>
+        <normal>[ -0.8893971834503689, 0.42645481613578545, -0.1646479269992317] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.10317605113550266, 0.034040115614560856, 0.09999999999999999] </planePoint>
+        <normal>[ 2.4175574833256314e-16, -1.5816553322421977e-16, 1.0] </normal>
+      </half_space>
+      <half_space type = "absolute">
+        <planePoint>[ 0.11838425453065511, 0.0, 0.10586325654813378] </planePoint>
+        <normal>[ 0.0, 1.0, 0.0] </normal>
+      </half_space>
+    </bounds>
+  </polyhedron>
+</Uintah_Include>

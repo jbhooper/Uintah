@@ -1,0 +1,316 @@
+<?xml version='1.0' encoding='ISO-8859-1' ?>
+<!--
+  Yield Stress
+  Pillar: .7 GPa
+  Substrate: .7GPa
+
+  Units used for this simulation,
+  *  density  -> picogram/micrometer^3
+  *  pressure -> picogram / (microsecond^2 * micrometer)
+  *  temperature -> K, kelvin
+  *  diffusivity -> micrometer^2 / microsecond
+
+  Conversions
+  *  density  -> 1 kg/m^3 = 1e-3 picogram/micrometer^3
+  *  pressure -> 1 GPa = 1e6 picogram / (microsecond^2 * micrometer)
+  *  diffusivity -> 1 m^2/s = 1e6 micrometer^2/microsecond
+-->
+<Uintah_specification>
+
+   <Meta>
+       <title>Quarter Cylinder - 2D - Low Res</title>
+   </Meta>    
+
+   <SimulationComponent type="mpm" />
+
+   <Time>
+<!--     <maxTime>5.4e9</maxTime> -->
+     <maxTime>1800.0e6</maxTime> <!-- One half hour -->
+     <initTime>0.0</initTime>
+     <delt_min>1.0e-16</delt_min>
+     <delt_max>1.0e6</delt_max>
+<!--
+     <max_Timesteps>4</max_Timesteps>
+-->
+     <timestep_multiplier>0.75</timestep_multiplier>
+   </Time>    
+
+    <SimulationController>
+    <RuntimeStats>
+      <frequency>250</frequency>
+      <onTimeStep>1</onTimeStep>
+    </RuntimeStats>
+    </SimulationController> 
+    <DataArchiver>
+      <filebase>data.Nanowire_Quarter_SingleSEIShell_ZeroStressFailure_3000MPaAdhesion_2C_1R.uda</filebase>
+<!--
+      <outputTimestepInterval>1</outputTimestepInterval>
+-->
+      <outputInterval>1.0e7</outputInterval>
+      <save label = "p.x"/>
+      <save label = "p.stress"/>
+      <save label = "p.mass"/>
+      <save label = "p.area"/>
+      <save label = "p.volume"/>
+      <save label = "p.concentration"/>
+      <save label = "p.plasticStrain"/>
+      <save label = "p.localizedMPM"/>
+      <save label = "p.porosity"/>
+      <save label = "p.particleID"/>
+      <save label = "p.scalefactor"/>
+      <save label = "g.mass"/>
+      <checkpoint cycle = "5" interval = "20e5"/>
+   </DataArchiver>
+
+   <MPM>
+     <time_integrator>explicit</time_integrator>
+     <interpolator>cpdi</interpolator>
+     <!-- <erosion algorithm = "AllowNoTension"/> -->
+     <!-- <create_new_particles>false</create_new_particles> -->
+     <!-- <manual_new_material>false</manual_new_material> -->
+     <cpdi_lcrit>0.95</cpdi_lcrit>
+     <use_load_curves> true </use_load_curves>
+     <do_scalar_diffusion>true</do_scalar_diffusion>
+     <do_auto_cycle_bc> true </do_auto_cycle_bc>
+     <auto_cycle_use_minmax> true </auto_cycle_use_minmax>
+     <auto_cycle_max> .90 </auto_cycle_max>
+     <auto_cycle_min> .13 </auto_cycle_min>
+     <DoPressureStabilization> false </DoPressureStabilization>
+   </MPM>
+   <!-- <AMR>
+      <useLockStep> true </useLockStep>
+      <MPM>
+        <Refinement_Criteria_Thresholds> </Refinement_Criteria_Thresholds>
+      </MPM>
+   </AMR> -->
+
+   <PhysicalConstants>
+      <gravity>            [0,0,0]   </gravity>
+   </PhysicalConstants>
+
+   <MaterialProperties>
+     <MPM>
+       <material name="Silicon">
+         <density>2.33e22</density>
+         <melt_temp> 2000.0 </melt_temp>
+         <do_conc_reduction> true </do_conc_reduction>
+         <constitutive_model type="rf_elastic_plastic"> 
+           <bulk_modulus>            67e6    </bulk_modulus>
+           <shear_modulus>           31e6    </shear_modulus>
+           <volume_expansion_coeff>  0.56     </volume_expansion_coeff>
+           <!-- Temperature is not currently used in this model, -->
+           <!-- Keep initial material Temperature set to 298.0 -->
+           <initial_material_temperature> 298.0 </initial_material_temperature>
+           <taylor_quinney_coeff>    0.9     </taylor_quinney_coeff>
+           <plastic_convergence_algo>radialReturn</plastic_convergence_algo>
+
+           <!-- Shear Modulus Model type added for clarity -->
+           <!-- Does not need to be added because this is the default value -->
+           <shear_modulus_model type = "constant_shear">
+           </shear_modulus_model>
+
+           <!-- Deviatoric Stress Model type added for clarity -->
+           <!-- Does not need to be added because this is the default value -->
+           <deviatoric_stress_model type="hypoElastic">
+           </deviatoric_stress_model>
+
+           <!-- Equation of State type added for clarity -->
+           <!-- Does not need to be added because this is the default value -->
+           <equation_of_state type = "default_hypo">
+           </equation_of_state>
+
+           <flow_model type = "isotropic_hardening">
+             <sigma_Y> 1.4e6</sigma_Y>
+             <K> 1.15e6</K>
+           </flow_model>
+
+           <yield_condition type = "vonMises">
+           </yield_condition>
+         </constitutive_model>
+         <thermal_conductivity>0.0</thermal_conductivity>
+         <specific_heat>5</specific_heat>
+         <diffusion_model type = "non_linear1">
+           <diffusivity>  1.0e-11   </diffusivity>
+           <max_concentration> 1.0 </max_concentration>
+           <use_pressure>true</use_pressure>
+           <tuning1> 6.00  </tuning1>
+           <tuning2> 0.50  </tuning2>
+           <tuning3> 0.0   </tuning3>
+           <tuning4> 3.0   </tuning4>
+           <tuning5> 1e-6  </tuning5>
+         </diffusion_model>
+
+   <geom_object>
+     <cylinder label="anode">
+       <bottom> [0.0, 0.0, -1.0] </bottom>
+       <top>    [0.0, 0.0,  1.0] </top>
+       <radius> 0.25 </radius>
+     </cylinder>
+     <res> [2,2,2] </res>
+     <velocity>[0.0, 0.0, 0.0]</velocity>
+     <temperature> 298 </temperature>
+     <concentration> 0 </concentration>
+   </geom_object>
+       </material>
+
+       <material name="monolithic_sei">
+         <density>2.11e22</density>
+         <melt_temp> 2000.0 </melt_temp>
+         <do_conc_reduction> false </do_conc_reduction>
+         <constitutive_model type="elastic_plastic_hp"> 
+           <bulk_modulus>            50.5e6    </bulk_modulus>
+           <shear_modulus>          22.2e6    </shear_modulus>
+           <evolve_porosity>true</evolve_porosity>
+           <do_melting>false</do_melting>
+           <useModifiedEOS>true</useModifiedEOS>
+           <check_TEPLA_failure_criterion>true</check_TEPLA_failure_criterion>
+           <check_max_stress_failure>false</check_max_stress_failure>
+           <critical_stress>12.9e9</critical_stress>
+
+           <!-- Temperature is not currently used in this model, -->
+           <!-- Keep initial material Temperature set to 298.0 -->
+           <initial_material_temperature> 298.0 </initial_material_temperature>
+           <taylor_quinney_coeff>    0.9     </taylor_quinney_coeff>
+           <plastic_convergence_algo>radialReturn</plastic_convergence_algo>
+
+           <!-- Shear Modulus Model type added for clarity -->
+           <!-- Does not need to be added because this is the default value -->
+           <shear_modulus_model type = "constant_shear">
+           </shear_modulus_model>
+
+           <!-- Deviatoric Stress Model type added for clarity -->
+           <!-- Does not need to be added because this is the default value -->
+           <deviatoric_stress_model type="hypoElastic">
+           </deviatoric_stress_model>
+
+           <!-- Equation of State type added for clarity -->
+           <!-- Does not need to be added because this is the default value -->
+           <equation_of_state type = "default_hypo">
+           </equation_of_state>
+
+           <flow_model type = "isotropic_hardening">
+       <sigma_Y> 581.0e3</sigma_Y> <!-- 581 MPa per paper -->
+                 <K> 2.905e6</K> <!-- 2.9 GPa per paper (text) -->
+           </flow_model>
+
+           <yield_condition type = "vonMises">
+           </yield_condition>
+
+
+          <initial_mean_porosity>         0.00 </initial_mean_porosity>
+          <initial_std_porosity>          0.00 </initial_std_porosity>
+          <critical_porosity>             0.3   </critical_porosity>
+          <frac_nucleation>               0.1   </frac_nucleation>
+          <meanstrain_nucleation>         0.3   </meanstrain_nucleation>
+          <stddevstrain_nucleation>       0.1  </stddevstrain_nucleation>
+          <initial_porosity_distrib>      constant </initial_porosity_distrib>
+
+         </constitutive_model>
+   <erosion algorithm = "ZeroStress">
+     <char_time> 1000.0 </char_time>
+   </erosion>
+   <thermal_conductivity>0.0</thermal_conductivity>
+         <specific_heat>5</specific_heat>
+
+         <diffusion_model type = "non_linear1">
+           <diffusivity>  0.0e-11   </diffusivity>
+           <max_concentration> 1.0 </max_concentration>
+           <use_pressure>true</use_pressure>
+           <tuning1> 0.00  </tuning1>
+           <tuning2> 0.00  </tuning2>
+           <tuning3> 0.0   </tuning3>
+           <tuning4> 3.0   </tuning4>
+           <tuning5> 1e-6  </tuning5>
+         </diffusion_model>
+   <geom_object>
+     <difference>
+       <cylinder>
+         <bottom> [0.0, 0.0, -1.0] </bottom>
+         <top>    [0.0, 0.0,  1.0] </top>
+         <radius> 0.30 </radius>
+       </cylinder>
+       <cylinder>
+        <bottom> [0.0, 0.0, -2.0] </bottom> <!-- Longer to ensure hollow middle -->
+        <top>    [0.0, 0.0,  2.0] </top>
+        <radius> 0.25 </radius>
+      </cylinder>
+     </difference>
+     <color> 1 </color>
+     <res> [2, 2, 2] </res>
+     <velocity> [0.0, 0.0, 0.0]</velocity>
+     <temperature> 298 </temperature>
+     <concentration> 0 </concentration>
+   </geom_object>
+     </material>
+     <contact>
+         <type>LR_coulomb_adhesive</type>
+         <mu> 0.25 </mu>
+         <shear_adhesion> 3000.0e+3 </shear_adhesion> <!-- 3000 MPa -->
+         <normal_adhesion> 3000.0e+3 </normal_adhesion> <!-- 3000 MPa -->
+    <materials>              [0,1]         </materials>
+     </contact>
+
+       <diffusion_interface>
+         <type>null</type>
+       </diffusion_interface>
+     </MPM>
+   </MaterialProperties>
+
+   <PhysicalBC>
+     <MPM>
+       <scalar_flux>
+         <geom_object>
+      <cylinder label = "flux_shell">
+        <bottom> [0.0, 0.0, -1.0] </bottom>
+        <top>    [0.0, 0.0,  1.0] </top>
+        <radius> 0.2505 </radius>
+      </cylinder>
+         </geom_object>
+         <load_curve>
+           <id>1</id>
+           <time_point>
+             <time> 0 </time>
+             <load> 2.50e-10 </load> <!-- 2.0 C -->
+           </time_point>
+           <time_point>
+             <time> 1e25 </time>
+             <load> 2.50e-10 </load> <!-- 2.0 C -->
+           </time_point>
+         </load_curve>
+       </scalar_flux>
+     </MPM>
+   </PhysicalBC>
+
+
+   <Grid>
+     <Level>
+       <Box label = "1">
+         <lower>        [0,0,0.0]      </lower>
+         <upper>        [0.6,0.6,0.01]      </upper>
+         <resolution>   [60, 60, 1 ]      </resolution>
+         <patches>      [2,2,1]            </patches>
+         <extraCells>   [1,1,1]            </extraCells>
+       </Box>
+     </Level>
+     <BoundaryConditions>
+      <Face side = "x-">
+        <BCType id = "all" label = "Symmetric" var = "symmetry"> </BCType>
+      </Face>
+      <Face side = "x+">
+        <BCType id = "all" label = "Symmetric" var = "symmetry"> </BCType>
+      </Face>
+      <Face side = "y-">
+        <BCType id = "all" label = "Symmetric" var = "symmetry"> </BCType>
+      </Face>                  
+      <Face side = "y+">
+        <BCType id = "all" label = "Symmetric" var = "symmetry"> </BCType>
+      </Face>
+      <Face side = "z-">
+        <BCType id = "all" label = "Symmetric" var = "symmetry"> </BCType>
+      </Face>                  
+      <Face side = "z+">
+        <BCType id = "all" label = "Symmetric" var = "symmetry"> </BCType>
+      </Face>
+     </BoundaryConditions>
+   </Grid>
+</Uintah_specification>
